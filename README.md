@@ -19,7 +19,6 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
  - bibliothèque utilisée pour les composants *React* "primaires" : **Material UI** (https://material-ui.com/)
  - consultation des tables sous formes de tableaux : **Material Table** (https://material-table.com/#/)
- - 
 
 ## Suggestions de technologies à utiliser pour des visualisations futures
 
