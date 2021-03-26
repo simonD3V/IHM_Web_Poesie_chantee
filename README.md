@@ -13,4 +13,15 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
  - [USTC : Universal short title catalogue](https://www.ustc.ac.uk/)
  - [Base JONAS (CNRS)](http://jonas.irht.cnrs.fr/)
 
-Google Sheet du benchmarck : [lien de l'étude](https://docs.google.com/spreadsheets/d/1B1YnON8SuA0V4xN6E9_GuyWgDd_7prJPd_0kmvBpcFY/edit?usp=sharing)
+*Google Sheet* du benchmarck : [lien de l'étude](https://docs.google.com/spreadsheets/d/1B1YnON8SuA0V4xN6E9_GuyWgDd_7prJPd_0kmvBpcFY/edit?usp=sharing)
+
+## Technologies et bibliothèque *JavaScript* utilisées pour le développement des fonctions primaires de l'IHM
+
+ - bibliothèque utilisée pour les composants *React* "primaires" : **Material UI** (https://material-ui.com/)
+ - consultation des tables sous formes de tableaux : **Material Table** (https://material-table.com/#/)
+ - 
+
+## Suggestions de technologies à utiliser pour des visualisations futures
+
+ - visualisation des structures strophiques : **Canvas (HTML5)**
+ - visualisation des objets de la bdd en graphe : **SigmaJS** (http://sigmajs.org/)
