@@ -25,6 +25,7 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
  - visualisation des structures strophiques : **Canvas (HTML5)**
  - visualisation des objets de la bdd en graphe : **SigmaJS** (http://sigmajs.org/)
  - visualisation personnalisable de fichiers audio : **WaveSurferJS** (https://wavesurfer-js.org/)
+ - visualisation de potentielles statistiques résultantes de recherches d'utilisateurs : **ApexChartsJS** (https://apexcharts.com/react-chart-demos/)
 
 ## Tâches à réaliser
 
