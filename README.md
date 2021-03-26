@@ -17,15 +17,15 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
 ## Technologies et bibliothèque *JavaScript* utilisées pour le développement des fonctions primaires de l'IHM
 
- - bibliothèque utilisée pour les composants *React* "primaires" : **Material UI** (https://material-ui.com/)
- - consultation des tables sous formes de tableaux : **Material Table** (https://material-table.com/#/)
+ - bibliothèque utilisée pour les composants *React* "primaires" : **Material UI** [lien](https://material-ui.com/)
+ - consultation des tables sous formes de tableaux : **Material Table** [lien](https://material-table.com/#/)
 
 ## Suggestions de technologies à utiliser pour des visualisations futures
 
  - visualisation des structures strophiques : **Canvas (HTML5)**
- - visualisation des objets de la bdd en graphe : **SigmaJS** (http://sigmajs.org/)
- - visualisation personnalisable de fichiers audio : **WaveSurferJS** (https://wavesurfer-js.org/)
- - visualisation de potentielles statistiques résultantes de recherches d'utilisateurs : **ApexChartsJS** (https://apexcharts.com/react-chart-demos/)
+ - visualisation des objets de la bdd en graphe : **SigmaJS** [lien](http://sigmajs.org/)
+ - visualisation personnalisable de fichiers audio : **WaveSurferJS** [lien](https://wavesurfer-js.org/)
+ - visualisation de potentielles statistiques résultantes de recherches d'utilisateurs : **ApexChartsJS** [lien](https://apexcharts.com/react-chart-demos/)
 
 ## Tâches à réaliser
 
