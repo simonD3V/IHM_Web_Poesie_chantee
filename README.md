@@ -17,7 +17,7 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
 ## Technologies et bibliothèques *JavaScript* utilisées pour le développement des fonctions primaires de l'IHM
 
- - bibliothèque utilisée pour les composants *React* "primaires" : [**Material UI**](https://material-ui.com/)
+ - bibliothèque utilisée pour les composants *ReactJS* "primaires" : [**Material UI**](https://material-ui.com/)
  - consultation des tables sous formes de tableaux : [**Material Table**](https://material-table.com/#/)
 
 ## Suggestions de technologies à utiliser pour des visualisations futures
