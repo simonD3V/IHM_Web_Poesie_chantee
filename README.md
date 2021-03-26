@@ -9,5 +9,8 @@ Développement d'une IHM Web pour l'exploration de corpus de poésies chantées
 ## Etude de l'existant
 IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches/explorations de données et les technologies utilisées
 
- - [Theaville : parodies dramatiques d’opéra au XVIIIe siècle](http://www.theaville.org/kitesite/index.php)
+ - [Theaville : parodies dramatiques d’opéra au XVIIIe siècle](http://www.theaville.org/)
  - [USTC : Universal short title catalogue](https://www.ustc.ac.uk/)
+ - [Base JONAS (CNRS)](http://jonas.irht.cnrs.fr/)
+
+Google Sheet du benchmarck : [lien de l'étude](https://docs.google.com/spreadsheets/d/1B1YnON8SuA0V4xN6E9_GuyWgDd_7prJPd_0kmvBpcFY/edit?usp=sharing)
