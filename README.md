@@ -1,4 +1,4 @@
-# IHM Web : Les timbres : poésie chantée du XVIe siècle
+# IHM Web - Les timbres : poésie chantée du XVIe siècle
 Développement d'une IHM Web pour l'exploration de corpus de poésies chantées
 
 ![Interface web - Timbres](https://i.ytimg.com/vi/RWHYzeiAYyY/maxresdefault.jpg "Interface web - Timbres")
