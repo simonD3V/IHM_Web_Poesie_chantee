@@ -34,6 +34,9 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 - [ ] Fonctions de recherches complexes par champs (choisir les champs des tables où éxécuter les recherches)
 - [ ] Fonctions de recherches sur la structure strophique des textes publiés
 
+### Visualisation des textes
+- [x] Visualisation des structures strophiques 
+
 ### Visualisations des familles de textes
 - [ ] Visualisation des familles de textes ('groupes_textes') via une _timeline_ permettant l'identification d'un potentiel texte _racine_ pour chaque famille
 
