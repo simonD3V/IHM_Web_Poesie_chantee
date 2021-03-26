@@ -24,3 +24,8 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
  - visualisation des structures strophiques : **Canvas (HTML5)**
  - visualisation des objets de la bdd en graphe : **SigmaJS** (http://sigmajs.org/)
+
+## Tâches à réaliser
+
+- [x] Fonctions de recherches simple (chaîne de caratères recherchée dans l'ensemble de la base)
+- [ ] 
