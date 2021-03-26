@@ -24,8 +24,19 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
  - visualisation des structures strophiques : **Canvas (HTML5)**
  - visualisation des objets de la bdd en graphe : **SigmaJS** (http://sigmajs.org/)
+ - visualisation personnalisable de fichiers audio : **WaveSurferJS** (https://wavesurfer-js.org/)
 
 ## Tâches à réaliser
 
-- [x] Fonctions de recherches simple (chaîne de caratères recherchée dans l'ensemble de la base)
-- [ ] 
+### Fonctions de recherches 
+- [x] Fonctions de recherches simples (chaîne de caratères recherchée dans l'ensemble de la base)
+- [ ] Fonctions de recherches complexes par champs (choisir les champs des tables où éxécuter les recherches)
+- [ ] Fonctions de recherches sur la structure strophique des textes publiés
+
+### Visualisations des familles de textes
+- [ ] Visualisation des familles de textes ('groupes_textes') via une _timeline_ permettant l'identification d'un potentiel texte _racine_ pour chaque famille
+
+### Visualisation des airs
+- [ ] Implémentation d'un module interactif pour écouter les interprétations musicales des airs
+- [ ] Visualisation des patterns des _airs_ via la notation musicale moderne
+ 
