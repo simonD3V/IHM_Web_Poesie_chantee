@@ -15,7 +15,7 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
 *Google Sheet* du benchmarck : [lien de l'étude](https://docs.google.com/spreadsheets/d/1B1YnON8SuA0V4xN6E9_GuyWgDd_7prJPd_0kmvBpcFY/edit?usp=sharing)
 
-## Technologies et bibliothèque *JavaScript* utilisées pour le développement des fonctions primaires de l'IHM
+## Technologies et bibliothèques *JavaScript* utilisées pour le développement des fonctions primaires de l'IHM
 
  - bibliothèque utilisée pour les composants *React* "primaires" : [**Material UI**](https://material-ui.com/)
  - consultation des tables sous formes de tableaux : [**Material Table**](https://material-table.com/#/)
@@ -23,7 +23,7 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 ## Suggestions de technologies à utiliser pour des visualisations futures
 
  - visualisation des structures strophiques : **Canvas (HTML5)**
- - visualisation des objets de la bdd en graphe : [**SigmaJS**](http://sigmajs.org/)
+ - visualisation d'objets de la BDD en graphe : [**SigmaJS**](http://sigmajs.org/)
  - visualisation personnalisable de fichiers audio : [**WaveSurferJS**](https://wavesurfer-js.org/)
  - visualisation de potentielles statistiques résultantes de recherches d'utilisateurs : [**ApexChartsJS**](https://apexcharts.com/react-chart-demos/)
 
@@ -31,7 +31,7 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 
 ### Fonctions de recherches 
 - [x] Fonctions de recherches simples (chaîne de caratères recherchée dans l'ensemble de la base)
-- [ ] Fonctions de recherches complexes par champs (choisir les champs des tables où éxécuter les recherches)
+- [ ] Fonctions de recherches complexes par champ (choisir les champs des tables où éxécuter les recherches)
 - [ ] Fonctions de recherches sur la structure strophique des textes publiés
 
 ### Visualisation des textes
