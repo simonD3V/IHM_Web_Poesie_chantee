@@ -44,3 +44,5 @@ IHM de projets 'Humanités numériques' : étudier leurs fonctions de recherches
 - [ ] Implémentation d'un module interactif pour écouter les interprétations musicales des airs
 - [ ] Visualisation des patterns des _airs_ via la notation musicale moderne
  
+### Crédits
+- [ ] Ajouter une page pour décrire l'ensemble du projet et présenter ces contributeurs
