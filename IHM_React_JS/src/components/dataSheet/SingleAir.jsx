@@ -123,7 +123,6 @@ function SingleAir({ history, match }) {
     };
 
     const query = `{
-        items {
           airs(filter: {id: {_eq: "${id}"}}) {
             id
             sources_musicales
@@ -133,35 +132,35 @@ function SingleAir({ history, match }) {
             surnom_3
             surnom_4
             surnom_5
-            enregistrement
-          }
-          timbres(filter: {airs_id: {id: {_eq: "${id}"}}}) {
-            airs_id {
-              id
-            }
-            textes_publies_id {
-              id
-              titre
-              auteur
-              sur_l_air_de
-              incipit
-              incipit_normalise
-              provenance
-              theme {
-                themes_id {
-                  theme
+            surnom_6
+            surnom_7
+            surnom_8
+            surnom_9
+            surnom_10
+            surnom_11
+            surnom_12
+            surnom_13
+            surnom_14
+            enregistrement_air
+            textes_publies(filter: {airs: {id: {_eq: "${id}"}}}) {
+                textes_publies {
+                  id
+                  titre
+                  auteur
+                  sur_l_air_de
+                  incipit
+                  incipit_normalise
+                  provenance
                 }
+                enregistrement_web
+                enregistrement_sherlock
               }
-            }
-            enregistrement_web
-            enregistrement_sherlock
           }
-        }
-      }`
+        }`
 
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +171,6 @@ function SingleAir({ history, match }) {
                 })
             })
             let j = await d.json()
-            // setData(j)
             transformData(j)
         })()
     }, [query])
@@ -182,36 +180,31 @@ function SingleAir({ history, match }) {
         let res_timbres = []
 
         let initialStr = JSON.stringify(j)
-        let finalStr = initialStr.slice(17, initialStr.length - 2)
-
-        // // aller chercher les textes de l'exemplaire sélectionné
+        let finalStr = initialStr.slice(17, initialStr.length - 3)
         if (finalStr !== '') {
             res_tmp = JSON.parse(finalStr)
-            if (res_tmp['airs'].length) {
-                // update les informations du texte sélectionné
-                // on suppose qu'un seul texte peut être sélectionné dans le résultat de la query et donc que les uuid sont uniques 
+            setDataAir(JSON.parse(finalStr))
 
-                setDataAir(res_tmp['airs'][0])
-            }
-            if (res_tmp['timbres'].length) {
+            if (res_tmp['textes_publies'].length) {
                 // update les informations des timbres liés à l'air sélectionné
-
                 let tmpStr = '['
                 // on incorpore 'enregistrement_web' et 'enregistrement_sherlock' directement à dataTextes
-                for (let i = 0; i < res_tmp['timbres'].length; i++) {
-                    tmpStr = tmpStr.concat(JSON.stringify(res_tmp['timbres'][i]['textes_publies_id']))
+                for (let i = 0; i < res_tmp['textes_publies'].length; i++) {
+                    tmpStr = tmpStr.concat(JSON.stringify(res_tmp['textes_publies'][i]['textes_publies']))
                     tmpStr = tmpStr.substr(0, tmpStr.length - 1)
-                    tmpStr = tmpStr.concat(', "enregistrement_web" : ' + JSON.stringify(res_tmp['timbres'][i]['enregistrement_web']))
-                    tmpStr = tmpStr.concat(', "enregistrement_sherlock" : ' + JSON.stringify(res_tmp['timbres'][i]['enregistrement_sherlock']))
+                    tmpStr = tmpStr.concat(', "enregistrement_web" : ' + JSON.stringify(res_tmp['textes_publies'][i]['enregistrement_web']))
+                    tmpStr = tmpStr.concat(', "enregistrement_sherlock" : ' + JSON.stringify(res_tmp['textes_publies'][i]['enregistrement_sherlock']))
                     tmpStr = tmpStr.concat('}, ')
                 }
                 tmpStr = tmpStr.substr(0, tmpStr.length - 2)
                 tmpStr = tmpStr.concat(']')
                 res_timbres = JSON.parse(tmpStr)
+                console.log(res_timbres)
                 setDataTextes(res_timbres)
             }
         }
     }
+
 
     function getSearchersNames(rowData) {                                // renvoie le nom complet du champs provenance
         switch (rowData['provenance']) {
@@ -242,24 +235,14 @@ function SingleAir({ history, match }) {
         }
     }
 
-    function getThemesNames(rowData) {
-        if (rowData['theme']) {
-            let l = rowData['theme'].length
-            let liste_themes_names = []
-            for (var i = 0; i < l; i++) {
-                liste_themes_names.push((rowData["theme"][i]["themes_id"]['theme']))
-            }
-            return String(liste_themes_names)
-        }
-    };
-
     return (
         <div className={classes.root} >
             <Box className={classes.marginTitle}>
                 <Typography variant='h6' color='textSecondary' align='justify'  >
                     Table des airs
+                    {console.log(dataAir)}
                 </Typography>
-                <Typography color='inherit' variant='h3' align='justify'>
+                <Typography color='inherit' variant='h6' align='justify'>
                     {dataAir['id']}
                 </Typography>
             </Box>
@@ -273,7 +256,7 @@ function SingleAir({ history, match }) {
                         <Typography variant='h6' color='textSecondary' align='justify'>
                             Air normalisé
                         </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
+                        <Typography variant='h3' color='inherit' align='justify'>
                             <i>{dataAir['air_normalise']}</i>
                         </Typography>
                     </Grid>
@@ -282,7 +265,7 @@ function SingleAir({ history, match }) {
                             Surnoms
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
-                            {dataAir['surnom_1'] ? ('- ' + dataAir["surnom_1"]) : 'Champs manquant'}
+                            {dataAir['surnom_1'] ? (dataAir["surnom_1"]) : 'Champs manquant'}
                             {dataAir['surnom_2'] && ('- ' + dataAir["surnom_2"])}
                             {dataAir['surnom_3'] && ('- ' + dataAir["surnom_3"])}
                             {dataAir['surnom_4'] && ('- ' + dataAir["surnom_4"])}
@@ -295,7 +278,7 @@ function SingleAir({ history, match }) {
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
                             module pour écouter
-                           {dataAir['enregistrement']}
+                           {dataAir['enregistrement_air']}
                         </Typography>
                     </Grid>
                     <Grid item xs className={classes.margin} >
@@ -352,7 +335,6 @@ function SingleAir({ history, match }) {
                                 }}
                                 icons={tableIcons}
                                 columns={[
-                                    { title: 'Description référence', field: 'description_reference' },
                                     { title: 'UUID', field: 'id' },
                                     { title: 'Titre', field: 'titre' },
                                     { title: 'Auteur', field: 'auteur' },
@@ -361,8 +343,7 @@ function SingleAir({ history, match }) {
                                     { title: 'Incipit normalisé', field: 'incipit_normalise' },
                                     { title: 'Enregistrement web', field: 'enregistrement_web' },
                                     { title: 'Enregistrement sherlock', field: 'enregistrement_sherlock' },
-                                    { title: 'Entrée par ', field: 'provenance', render: rowData => getSearchersNames(rowData) },
-                                    { title: 'Thèmes', field: 'theme', render: rowData => getThemesNames(rowData) }
+                                    // { title: 'Entrée par ', field: 'provenance', render: rowData => getSearchersNames(rowData) },
                                 ]}
                                 data={dataTextes}
                                 title={dataTextes ? ("Texte(s) correspondant(s) - " + dataTextes.length + " résultat(s)") : ('Textes')}
