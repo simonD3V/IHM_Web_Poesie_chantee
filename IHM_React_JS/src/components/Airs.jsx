@@ -101,33 +101,23 @@ function Airs() {
     const [data, setData] = useState([])
 
     const query = `{
-        items {
-          airs {
+          airs(limit: 1000) {
             id
             sources_musicales
             air_normalise
             surnom_1
-            surnom_2
-            surnom_3
-            surnom_4
-            surnom_5
-            enregistrement
-            reference {
-              id
-            }
-            textes {
-              textes_publies_id {
-                titre
-              }
+            textes_publies {
+                textes_publies {
+                    id
+                    titre
+                }
             }
           }
-        }
       }
       `
-
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -142,11 +132,10 @@ function Airs() {
         })()
     }, [query])
 
-
     function dataAirs() {
         let res = []
         let initialStr = JSON.stringify(data)
-        let finalStr = initialStr.slice(25, initialStr.length - 3)
+        let finalStr = initialStr.slice(16, initialStr.length - 2)
         if (finalStr !== '') {
             res = JSON.parse(finalStr)
             console.log(res)
@@ -155,10 +144,19 @@ function Airs() {
     }
 
     function getTheTextUUID(rowData) {
-        let l = rowData["textes"].length
+        let l = rowData["textes_publies"].length
         let liste_name_textes = []
         for (var i = 0; i < l; i++) {
-            liste_name_textes.push((rowData["textes"][i]["textes_publies_id"]["titre"]))
+            if (rowData['textes_publies'][i].hasOwnProperty('textes_publies')) {
+                if ((rowData['textes_publies'][i]['textes_publies'] !== null)) {
+                    if (rowData['textes_publies'][i]['textes_publies']['titre'] !== "") {
+                        liste_name_textes.push(rowData["textes_publies"][i]["textes_publies"]["titre"])
+                    }
+                    else {
+                        liste_name_textes.push("Sans titre")
+                    }
+                }
+            }
         }
         return String(liste_name_textes)
     };
