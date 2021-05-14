@@ -109,76 +109,79 @@ function Visualisation() {
   const [displayGraph, setDisplayGraph] = useState(false)
 
   const query = `{
-    items {
-      airs {
+      airs(limit: 1000) {
+        id
+        air_normalise
+      }
+      references_externes(limit: 1000) {
+        titre
         id
       }
-      references_externes {
+      textes_publies(limit: 1000) {
         id
-      }
-      textes_publies {
-        id
-        exemplaires_id {
-          id
+        titre
+        edition {
+            id
         }
       }
-      themes {
+      themes(limit: 1000) {
+        theme
         id
       }
-      exemplaires {
+      editions(limit: 1000) {
+        titre_ouvrage
         id
       }
-      timbres {
+      timbres(limit: 1000) {
         id
-        airs_id {
+        airs {
           id
         }
-        textes_publies_id {
-          id
-        }
-      }
-      airs_references_externes {
-        id
-        airs_id {
-          id
-        }
-        references_externes_id {
+        textes_publies {
           id
         }
       }
-      exemplaires_references_externes {
+      airs_references_externes(limit: 1000) {
         id
-        exemplaires_id {
+        airs{
           id
         }
-        references_externes_id {
+        references_externes(limit: 1000) {
           id
         }
       }
-      textes_publies_references_exter {
+      editions_references_externes(limit: 1000) {
         id
-        textes_publies_id {
+        editions {
           id
         }
-        references_externes_id {
+        references_externes {
           id
         }
       }
-      textes_publies_themes {
+      textes_publies_references_externes(limit: 1000) {
         id
-        textes_publies_id {
+        textes_publies {
           id
         }
-        themes_id {
+        references_externes {
           id
         }
       }
-    }
+      textes_publies_themes(limit: 1000) {
+        id
+        textes_publies {
+          id
+        }
+        themes {
+          id
+        }
+      }
   }`
 
   useEffect(() => {
     (async () => {
-      let d = await fetch('http://localhost:8055/graphql/', {
+      let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,18 +202,32 @@ function Visualisation() {
   async function transformData(json) {
     let res = ''
     let initialStr = JSON.stringify(json)
-    let finalStr = initialStr.slice(17, initialStr.length - 2)
+    let finalStr = initialStr.slice(9, initialStr.length - 2)
     if (finalStr !== '') {
-      var d = JSON.parse(finalStr)
+      var d = JSON.parse('{' + finalStr + '}')
       setDataInter(d)
       const color = ['#B1D3DD', '#B2DA82', '#FFC300', '#FF5733', '#80624D']
       // Les NODES sont les tables suivantes :
-      // airs - textes_publies - references_externes - themes - exemplaires
-      let nodes = ['airs', 'textes_publies', 'references_externes', 'themes', 'exemplaires']
+      // airs - textes_publies - references_externes - themes - editions
+      let nodes = ['airs', 'textes_publies', 'references_externes', 'themes', 'editions']
       res = res.concat('{ "nodes" : [ ')
       for (var n = 0; n < nodes.length; n++) {
         for (var i = 0; i < d[nodes[n]].length; i++) {
-          res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['id'] + '", "color" : "' + color[n] + '" }')
+          if (nodes[n]==='airs') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['air_normalise'] + '", "color" : "' + color[n] + '" }') 
+          }
+          if (nodes[n]==='textes_publies') { 
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }') 
+          }
+          if (nodes[n]==='references_externes') { 
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }') 
+          }
+          if (nodes[n]==='themes') { 
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['theme'] + '", "color" : "' + color[n] + '" }') 
+          }
+          if (nodes[n]==='editions') { 
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre_ouvrage'] + '", "color" : "' + color[n] + '" }') 
+          }
           if (i !== d[nodes[n]].length) {
             res = res.concat(', ')
           }
@@ -218,40 +235,40 @@ function Visualisation() {
         }
       }
       res = res.substring(0, res.length - 2)
-
       // Les LINKS sont les
       // timbres - airs_references_externes - exemplaires_references_externes - textes_publies_references_exter - textes_publies_themes
-      let links = ['timbres', 'airs_references_externes', 'exemplaires_references_externes', 'textes_publies_references_exter', 'textes_publies_themes']
+      let links = ['timbres', 'airs_references_externes', 'editions_references_externes', 'textes_publies_references_externes', 'textes_publies_themes']
       res = res.concat('], "edges" : [')
+
       for (var l = 0; l < links.length; l++) {
         for (i = 0; i < d[links[l]].length; i++) {
           if (links[l] === 'timbres') {
-            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['airs_id']['id'] + '", "target" : "' + d[links[l]][i]['textes_publies_id']['id'] + '", "color" : "#CFCFCF" }, ')
+            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['airs']['id'] + '", "target" : "' + d[links[l]][i]['textes_publies']['id'] + '", "color" : "#CFCFCF" }, ')
           }
           if (links[l] === 'airs_references_externes') {
-            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['airs_id']['id'] + '", "target" : "' + d[links[l]][i]['references_externes_id']['id'] + '", "color" : "#CFCFCF" }, ')
+            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['airs']['id'] + '", "target" : "' + d[links[l]][i]['references_externes']['id'] + '", "color" : "#CFCFCF" }, ')
           }
-          if (links[l] === 'exemplaires_references_externes') {
-            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['exemplaires_id']['id'] + '", "target" : "' + d[links[l]][i]['references_externes_id']['id'] + '", "color" : "#CFCFCF" }, ')
+          if (links[l] === 'editions_references_externes') {
+            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['editions']['id'] + '", "target" : "' + d[links[l]][i]['references_externes']['id'] + '", "color" : "#CFCFCF" }, ')
           }
-          if (links[l] === 'textes_publies_references_exter') {
-            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['textes_publies_id']['id'] + '", "target" : "' + d[links[l]][i]['references_externes_id']['id'] + '", "color" : "#CFCFCF" }, ')
+          if (links[l] === 'textes_publies_references_externes') {
+            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['textes_publies']['id'] + '", "target" : "' + d[links[l]][i]['references_externes']['id'] + '", "color" : "#CFCFCF" }, ')
           }
           if (links[l] === 'textes_publies_themes') {
-            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['textes_publies_id']['id'] + '", "target" : "' + d[links[l]][i]['themes_id']['id'] + '", "color" : "#CFCFCF" }, ')
+            res = res.concat('{ "id" : "' + d[links[l]][i]['id'] + '", "source" : "' + d[links[l]][i]['textes_publies']['id'] + '", "target" : "' + d[links[l]][i]['themes_id']['id'] + '", "color" : "#CFCFCF" }, ')
           }
         }
       }
       // Il faut maintenant relier les textes à leur exemplaire respectif, on invente une id pour ces liens 
       for (var e = 0; e < d[nodes[1]].length; e++) {
-        res = res.concat('{ "id" : "' + e + '", "source" : "' + d[nodes[1]][e]['id'] + '", "target" : "' + d[nodes[1]][e]['exemplaires_id']['id'] + '", "color" : "#CFCFCF" }, ')
+        res = res.concat('{ "id" : "' + e + '", "source" : "' + d[nodes[1]][e]['id'] + '", "target" : "' + d[nodes[1]][e]['edition']['id'] + '", "color" : "#CFCFCF" }, ')
       }
-      res = res.substring(0, res.length - 2)
-      res = res.concat(']}')
-      let res_json = JSON.parse(res)
-      setDataTransformation(res_json)
-      console.log(res)
-      console.log(res_json)
+        res = res.substring(0, res.length - 2)
+        res = res.concat(']}')
+        let res_json = JSON.parse(res)
+        setDataTransformation(res_json)
+        console.log(res)
+        console.log(res_json)
 
     }
   }
@@ -281,7 +298,7 @@ function Visualisation() {
                       {circle_air}
                     </Avatar>
                   </ListItemAvatar>
-                  {console.log(dataInter)}
+                  {/* {console.log(dataInter)} */}
                   <ListItemText primary="Airs" secondary={dataInter['airs'].length + " élément"} />
                 </ListItem>
                 <ListItem>
@@ -298,7 +315,7 @@ function Visualisation() {
                       {circle_exemplaires}
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary="Exemplaires" secondary={dataInter['exemplaires'].length + " éléments"} />
+                  <ListItemText primary="Editions" secondary={dataInter['editions'].length + " éléments"} />
                 </ListItem>
                 <ListItem>
                   <ListItemAvatar>
