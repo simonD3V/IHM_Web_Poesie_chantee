@@ -6,7 +6,7 @@ import { Home as HomeIcon } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 import Airs from './components/Airs'
 import Home from './components/Home'
-import Exemplaires from './components/Exemplaires'
+import Editions from './components/Editions'
 import Textes_publiés from './components/Textes_publiés'
 import Thèmes from './components/Thèmes'
 import Typography from '@material-ui/core/Typography';
@@ -17,7 +17,7 @@ import ListItem from '@material-ui/core/ListItem';
 import Footer from './components/Footer';
 import Rechercher from './components/Rechercher';
 import Visualisation from './components/Visualisation';
-import SingleExemplaire from './components/dataSheet/SingleExemplaire';
+import SingleEdition from './components/dataSheet/SingleEdition';
 import References from './components/Références'
 import SingleTextePublie from './components/dataSheet/SingleTextePublie';
 import SingleReference from './components/dataSheet/SingleReference';
@@ -94,9 +94,9 @@ function App() {
                         color='inherit'
                         aria-label='home'
                         component={Link}
-                        to='/exemplaires'
+                        to='/editions'
                         startIcon={< i class="fas fa-book" > </i>}>
-                        Exemplaires
+                        Editions
                     </Button>
                 </ListItem>
                 <ListItem>
@@ -200,12 +200,12 @@ function App() {
                 <Switch >
                     <Route exact path='/' children={Home} />
                     <Route path='/airs' children={Airs} />
-                    <Route path='/exemplaires' children={Exemplaires} />
+                    <Route path='/editions' children={Editions} />
                     <Route path='/textes_publies' children={Textes_publiés} />
                     <Route path='/themes' children={Thèmes} />
                     <Route path='/references' children={References} />
 
-                    <Route path='/single_exemplaire/:id' children={SingleExemplaire} />
+                    <Route path='/single_edition/:id' children={SingleEdition} />
                     <Route path='/single_texte_publie/:id' children={SingleTextePublie} />
                     <Route path='/single_reference/:id' children={SingleReference} />
                     <Route path='/single_air/:id' children={SingleAir} />
