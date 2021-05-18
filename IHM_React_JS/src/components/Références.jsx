@@ -104,21 +104,19 @@ function References() {
     const [data, setData] = useState([])
 
     const query = `{
-        items {
-            references_externes {
-                id
-                lien
-                titre
-                annee
-                editeur
-                auteur
-          }
+        references_externes {
+            id
+            lien
+            titre
+            annee
+            editeur
+            auteur
         }
       }`
 
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -136,7 +134,8 @@ function References() {
     function dataReferences() {
         let res = []
         let initialStr = JSON.stringify(data)
-        let finalStr = initialStr.slice(40, initialStr.length - 3)
+        let finalStr = initialStr.slice(31, initialStr.length - 2)
+        console.log(finalStr)
         if (finalStr !== '') {
             res = JSON.parse(finalStr)
             console.log(res)
