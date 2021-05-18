@@ -132,10 +132,9 @@ function SingleTextePublie({ history, match }) {
     const handleClickRef = () => {
         setOpenReference(!openReference);
     };
-
-    const query = `{
-        items {
-          textes_publies(filter: {id: {_eq: "${id}"}}) {
+    const query = `
+    {
+        textes_publies(filter: {id: {_eq: "${id}"}}) {
             id
             titre
             sur_l_air_de
@@ -143,59 +142,69 @@ function SingleTextePublie({ history, match }) {
             incipit_normalise
             provenance
             auteur
-            theme {
-              themes_id {
-                theme
-              }
+            auteur_statut_source
+            auteur_source_information
+            nature_texte
+            themes {
+                themes {
+                    id
+                    theme
+                }
             }
-            exemplaires_id {
+            edition {
                 id
+                editeur_source_information
+                libraire
+                imprimeur
+                editeur
+                religion
+                notes_provenance
+                numero_cote
+                prefixe_cote
+                groupe_ouvrage
+                nombre_pieces
+                provenance
+                editions_modernes
                 titre_ouvrage
                 auteur
-                ville_conservation
-                depot_conservation
-                lieu_edition_indique
-                lieu_edition_reel
-                lieu_edition_source_information
+                ville_conservation_exemplaire_1
+                depot_conservation_exemplaire_1
                 annee_indiquee
                 annee_estimee
                 format
-              }
-            groupe_texte
-            nature_texte
-            deux_premiers_vers_premier_couplet
-            deux_premiers_vers_premier_couplet_normalises
-            refrain
-            refrain_normalise
+                manuscrit_imprime
+                forme_editoriale
+                lieu_edition_reel
+                lieu_edition_indique
+                lieu_edition_source_information
+                editeur_libraire_imprimeur
+            }
             variante
-            variante_normalisee
-            source_information
+            variante_normalise
             page
             contenu_texte
             numero_d_ordre
-            auteur_statut_source
-            auteur_source_information
             lien_web_visualisation
             contenu_analytique
             forme_poetique
             notes_forme_poetique
-            references {
-                references_externes_id {
-                  id
-                  lien
-                  titre
-                  annee
-                  editeur
-                  auteur
+            references_externes {
+                references_externes {
+                    id
+                    lien
+                    titre
+                    annee
+                    editeur
+                    auteur
                 }
                 description_reference
-              } 
-          }
-          timbres(filter: {textes_publies_id: {id: {_eq: "${id}"}}}) {
-            textes_publies_id {
+            }
+        }
+        timbres(filter: {textes_publies: {id: {_eq: "${id}"}}}) {
+            textes_publies {
               id
             }
-            airs_id {
+            airs {
               id
               sources_musicales
               air_normalise
@@ -203,13 +212,13 @@ function SingleTextePublie({ history, match }) {
             }
             enregistrement_web
             enregistrement_sherlock
-          }
         }
-      }`
+    }      
+    `
 
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -230,16 +239,15 @@ function SingleTextePublie({ history, match }) {
         let res_timbres = []
 
         let initialStr = JSON.stringify(j)
-        let finalStr = initialStr.slice(17, initialStr.length - 2)
+        let finalStr = initialStr.slice(8, initialStr.length - 1)
 
         let lengthData = 0
-        // // aller chercher les textes de l'exempl aire sélectionné
+        // // aller chercher les textes de l'exemplaire sélectionné
         if (finalStr !== '') {
             res_tmp = JSON.parse(finalStr)
             if (res_tmp['textes_publies'].length) {
                 // update les informations du texte sélectionné
                 // on suppose qu'un seul texte peut être sélectionné dans le résultat de la query et donc que les uuid sont uniques 
-
                 setDataTexte(res_tmp['textes_publies'][0])
             }
             if (res_tmp['timbres'].length) {
@@ -283,6 +291,14 @@ function SingleTextePublie({ history, match }) {
                             Alice Tacaille <br />
                             Tatiana Debbagi Baranova
                          </Typography>
+                    </>
+                )
+            case (null):
+                return (
+                    <>
+                        <Typography color='inherit' align='justify'>
+                            Pas d'information <br />
+                        </Typography>
                     </>
                 )
             default:
@@ -368,14 +384,14 @@ function SingleTextePublie({ history, match }) {
     }
 
     function getReference() {
-        if (dataTexte['references'].length !== 0) {
-            let l = dataTexte['references'].length
+        if (dataTexte['references_externes'].length !== 0) {
+            let l = dataTexte['references_externes'].length
             let res = '['
             for (var i = 0; i < l; i++) {
-                res = res.concat(JSON.stringify(dataTexte['references'][i]['references_externes_id']))
+                res = res.concat(JSON.stringify(dataTexte['references_externes'][i]['references_externes']))
                 res = res.substr(0, res.length - 1)
                 res = res.concat(', "description_reference" : ')
-                res = res.concat(JSON.stringify(dataTexte['references'][i]['description_reference']))
+                res = res.concat(JSON.stringify(dataTexte['references_externes'][i]['description_reference']))
                 res = res.concat('},')
             }
             res = res.substring(0, res.length - 1)
@@ -389,8 +405,8 @@ function SingleTextePublie({ history, match }) {
 
             <Box className={classes.marginTitle}>
                 <Typography variant='h6' color='textSecondary' align='justify'  >
-                    {console.log(dataTexte)}
                     Table des textes
+                    {console.log(dataTexte)}
                 </Typography>
                 <Typography color='inherit' variant='subtitle2' align='justify'>
                     {dataTexte['id']}
@@ -462,10 +478,10 @@ function SingleTextePublie({ history, match }) {
                             Lieu de publication de l'exemplaire « contenant »
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
-                            Lieu indiqué : {dataTexte['exemplaires_id'] ? (dataTexte['exemplaires_id']['lieu_edition_indique'] ? dataTexte['exemplaires_id']['lieu_edition_indique'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
+                            Lieu indiqué : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_indique'] ? dataTexte['edition']['lieu_edition_indique'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
                         </Typography>
                         <Typography variant='subtitle2' color='inherit' align='justify'>
-                            Lieu réel : {dataTexte['exemplaires_id'] ? (dataTexte['exemplaires_id']['lieu_edition_reel'] ? dataTexte['exemplaires_id']['lieu_edition_reel'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
+                            Lieu réel : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_reel'] ? dataTexte['edition']['lieu_edition_reel'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
                         </Typography>
                     </Grid>
                     <Grid item xs className={classes.margin} >
@@ -595,7 +611,7 @@ function SingleTextePublie({ history, match }) {
                         {openAirs ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openAirs} timeout="auto" unmountOnExit>
-                        {dataTimbres['airs_id'] ? (
+                        {dataTimbres['airs'] ? (
                             <MaterialTable
                                 localization={{
                                     body: {
@@ -614,8 +630,8 @@ function SingleTextePublie({ history, match }) {
                                     { title: 'Nom air', field: 'air_normalise' },
                                     { title: 'Surnom', field: 'surnom_1' },
                                 ]}
-                                data={[dataTimbres['airs_id']]}
-                                title={[dataTimbres['airs_id']] ? ("Air(s) correspondant(s) - " + [dataTimbres['airs_id']].length + " résultat") : ('Airs')}
+                                data={[dataTimbres['airs']]}
+                                title={[dataTimbres['airs']] ? ("Air(s) correspondant(s) - " + [dataTimbres['airs']].length + " résultat") : ('Airs')}
                                 onRowClick={((evt, selectedRow) => {
                                     if (evt.target.nodeName === 'TD') {
                                         const selected_id = selectedRow['id']
@@ -648,11 +664,11 @@ function SingleTextePublie({ history, match }) {
                         <ListItemIcon>
                             <Icon class="fas fa-book" />
                         </ListItemIcon>
-                        <ListItemText primary="Exemplaire « contenant »" />
+                        <ListItemText primary="Editions « contenantes »" />
                         {openExemplaires ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openExemplaires} timeout="auto" unmountOnExit>
-                        {[dataTexte['exemplaires_id']] ? (
+                        {[dataTexte['edition']] ? (
                             <MaterialTable
                                 localization={{
                                     body: {
@@ -675,8 +691,8 @@ function SingleTextePublie({ history, match }) {
                                     { title: 'Année estimée', field: 'annee_estimee' },
                                     { title: 'Format', field: 'format' },
                                 ]}
-                                data={[dataTexte['exemplaires_id']]}
-                                title={[dataTexte['exemplaires_id']] ? ("Exemplaire correspondant - " + [dataTexte['exemplaires_id']].length + " résultat") : ('Exemplaire')}
+                                data={[dataTexte['edition']]}
+                                title={[dataTexte['edition']] ? ("Exemplaire correspondant - " + [dataTexte['edition']].length + " résultat") : ('Exemplaire')}
                                 onRowClick={((evt, selectedRow) => {
                                     if (evt.target.nodeName === 'TD') {
                                         const selected_id = selectedRow['id']
@@ -713,7 +729,7 @@ function SingleTextePublie({ history, match }) {
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataTexte['references'] ? (
+                        {dataTexte['references_externes'] ? (
                             <MaterialTable
                                 localization={{
                                     body: {
@@ -761,7 +777,6 @@ function SingleTextePublie({ history, match }) {
                                 </Typography>
                             )}
                     </Collapse>
-
                 </List>
             </Box>
         </div >
