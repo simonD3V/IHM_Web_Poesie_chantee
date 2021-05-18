@@ -129,7 +129,6 @@ function SingleReference({ history, match }) {
     };
 
     const query = `{
-        items {
           references_externes(filter: {id: {_eq: "${id}"}}){
             id
             lien
@@ -138,26 +137,26 @@ function SingleReference({ history, match }) {
             editeur
             auteur
           }
-          exemplaires_references_externes (filter: {references_externes_id: {id: {_eq: "${id}"}}}){
-            references_externes_id {
+          editions_references_externes (filter: {references_externes: {id: {_eq: "${id}"}}}){
+            references_externes {
               id
             }
-            exemplaires_id {
+            editions {
               id
               titre_ouvrage
               auteur
-              ville_conservation
-              depot_conservation
+              ville_conservation_exemplaire_1
+              depot_conservation_exemplaire_1
               annee_estimee
               annee_indiquee
               format
             }
           }
-          textes_publies_references_exter (filter: {references_externes_id: {id: {_eq: "${id}"}}}){
-            references_externes_id {
+          textes_publies_references_externes (filter: {references_externes: {id: {_eq: "${id}"}}}){
+            references_externes {
               id
             }
-            textes_publies_id {
+            textes_publies {
               id
               titre
               auteur
@@ -165,20 +164,19 @@ function SingleReference({ history, match }) {
               incipit
               incipit_normalise
               provenance
-              theme {
-                themes_id {
+              themes {
+                themes {
                   theme
                 }
               }
             }
             description_reference
           }
-        }
       }`
 
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,34 +198,34 @@ function SingleReference({ history, match }) {
         let res_exemplaires = []
 
         let initialStr = JSON.stringify(j)
-        let finalStr = initialStr.slice(17, initialStr.length - 2)
+        let finalStr = initialStr.slice(8, initialStr.length - 1)
 
         if (finalStr !== '') {
+            console.log(finalStr)
             res_tmp = JSON.parse(finalStr)
             if (res_tmp['references_externes'].length) {
                 // update les informations de la référence sélectionnée
                 // on suppose qu'une seule réf peut être sélectionnée dans le résultat de la query et donc que les uuid sont uniques 
                 setDataReference(res_tmp['references_externes'][0])
             }
+            if (res_tmp['editions_references_externes'].length) {
 
-            if (res_tmp['exemplaires_references_externes'].length) {
-
-                for (let i = 0; i < res_tmp['exemplaires_references_externes'].length; i++) {
-                    res_exemplaires.push(res_tmp['exemplaires_references_externes'][i]['exemplaires_id'])
+                for (let i = 0; i < res_tmp['editions_references_externes'].length; i++) {
+                    res_exemplaires.push(res_tmp['editions_references_externes'][i]['editions'])
                 }
                 setDataExemplaires(res_exemplaires)
             }
 
-            if (res_tmp['textes_publies_references_exter'].length) {
+            if (res_tmp['textes_publies_references_externes'].length) {
 
                 let tmpStr = '['
                 // on incorpore 'description_référence' directement à dataTextes 
-                for (let i = 0; i < res_tmp['textes_publies_references_exter'].length; i++) {
-                    tmpStr = tmpStr.concat(JSON.stringify(res_tmp['textes_publies_references_exter'][i]['textes_publies_id']))
+                for (let i = 0; i < res_tmp['textes_publies_references_externes'].length; i++) {
+                    tmpStr = tmpStr.concat(JSON.stringify(res_tmp['textes_publies_references_externes'][i]['textes_publies']))
                     tmpStr = tmpStr.substr(0, tmpStr.length - 1)
-                    tmpStr = tmpStr.concat(', "description_reference" : ' + JSON.stringify(res_tmp['textes_publies_references_exter'][i]['description_reference']))
+                    tmpStr = tmpStr.concat(', "description_reference" : ' + JSON.stringify(res_tmp['textes_publies_references_externes'][i]['description_reference']))
                     tmpStr = tmpStr.concat('}, ')
-                }
+                }   
                 tmpStr = tmpStr.substr(0, tmpStr.length - 2)
                 tmpStr = tmpStr.concat(']')
                 res_textes = JSON.parse(tmpStr)
@@ -283,7 +281,7 @@ function SingleReference({ history, match }) {
                 <Typography variant='h6' color='textSecondary' align='justify'  >
                     Table des références
                 </Typography>
-                <Typography color='inherit' variant='h3' align='justify'>
+                <Typography color='inherit' variant='h6' align='justify'>
                     {dataReference['id']}
                 </Typography>
             </Box>
@@ -297,7 +295,7 @@ function SingleReference({ history, match }) {
                         <Typography variant='h6' color='textSecondary' align='justify'>
                             Titre de l'ouvrage
                         </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
+                        <Typography variant='h3' color='inherit' align='justify'>
                             <i>{dataReference['titre']}</i>
                         </Typography>
                     </Grid>
@@ -363,7 +361,7 @@ function SingleReference({ history, match }) {
                         <ListItemIcon>
                             <Icon class="fas fa-book" />
                         </ListItemIcon>
-                        <ListItemText primary="Exemplaires référencés " />
+                        <ListItemText primary="Editions référencées " />
                         {openExemplaires ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openExemplaires} timeout="auto" unmountOnExit>
