@@ -98,9 +98,9 @@ function Textes_publies() {
 
     const [data, setData] = useState([])
 
-    const query = `{
-        items {
-          textes_publies {
+    const query = `
+    {
+        textes_publies(limit: 1000) {
             id
             titre
             sur_l_air_de
@@ -108,87 +108,68 @@ function Textes_publies() {
             incipit_normalise
             provenance
             auteur
-            theme {
-              themes_id {
-                theme
-              }
-            }
-            exemplaires_id {
-              id
-              editeur_source_information
-              libraire
-              imprimeur
-              editeur
-              religion
-              notes_provenance
-              numero_cote
-              prefixe_cote
-              groupe_ouvrage
-              nombre_pieces
-              provenance
-              editions_modernes
-              status
-              titre_ouvrage
-              auteur
-              ville_conservation
-              depot_conservation
-              annee_indiquee
-              annee_estimee
-              format
-              manuscrit_imprime
-              forme_editoriale
-              lieu_edition_reel
-              lieu_edition_indique
-              lieu_edition_source_information
-              editeur_libraire_imprimeur
-              reference {
-                references_externes_id {
-                  id
-                  lien
-                  titre
-                  annee
-                  editeur
-                  auteur
+            auteur_statut_source
+            auteur_source_information
+            themes {
+                themes {
+                    id
+                    theme
                 }
-              }
             }
-            groupe_texte
-            nature_texte
-            deux_premiers_vers_premier_couplet
-            deux_premiers_vers_premier_couplet_normalises
-            refrain
-            refrain_normalise
+            edition {
+                id
+                editeur_source_information
+                libraire
+                imprimeur
+                editeur
+                religion
+                notes_provenance
+                numero_cote
+                prefixe_cote
+                groupe_ouvrage
+                nombre_pieces
+                provenance
+                editions_modernes
+                titre_ouvrage
+                auteur
+                ville_conservation_exemplaire_1
+                depot_conservation_exemplaire_1
+                annee_indiquee
+                annee_estimee
+                format
+                manuscrit_imprime
+                forme_editoriale
+                lieu_edition_reel
+                lieu_edition_indique
+                lieu_edition_source_information
+                editeur_libraire_imprimeur
+            }
             variante
-            variante_normalisee
-            source_information
+            variante_normalise
             page
             contenu_texte
             numero_d_ordre
-            auteur_statut_source
-            auteur_source_information
             lien_web_visualisation
             contenu_analytique
             forme_poetique
             notes_forme_poetique
-            references {
-              references_externes_id {
-                id
-                lien
-                titre
-                annee
-                editeur
-                auteur
-              }
+            references_externes {
+                references_externes {
+                    id
+                    lien
+                    titre
+                    annee
+                    editeur
+                    auteur
+                }
             }
-          }
         }
-      }
-      
-      `
+    }      
+    `
 
     useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -206,27 +187,32 @@ function Textes_publies() {
     function dataTextes_publies() {
         let res = []
         let initialStr = JSON.stringify(data)
-        let finalStr = initialStr.slice(35, initialStr.length - 3)
-
+        let finalStr = initialStr.slice(26, initialStr.length - 2)
         if (finalStr !== '') {
             res = JSON.parse(finalStr)
             return res
         }
     }
 
+    function getAuteurEdition(rowData) {
+        if (rowData['edition']) {
+            return rowData['edition']['auteur']
+        }
+    }
+
     function getExemplaireTitle(rowData) {
-        if (rowData['exemplaires_id']) {
-            let titre_exemplaire = rowData["exemplaires_id"]["titre_ouvrage"]
+        if (rowData['edition']) {
+            let titre_exemplaire = rowData["edition"]["titre_ouvrage"]
             return (titre_exemplaire)
         }
     }
 
     function getThemesNames(rowData) {
-        if (rowData['theme']) {
-            let l = rowData['theme'].length
+        if (rowData['themes']) {
+            let l = rowData['themes'].length
             let liste_themes_names = []
             for (var i = 0; i < l; i++) {
-                liste_themes_names.push((rowData["theme"][i]["themes_id"]['theme']))
+                liste_themes_names.push((rowData["themes"][i]['theme']))
             }
             return String(liste_themes_names)
         }
@@ -285,10 +271,10 @@ function Textes_publies() {
                         columns={[
                             { title: 'UUID', field: 'id' },
                             { title: 'Titre', field: 'titre' },
-                            { title: 'Auteur', field: 'auteur' },
                             { title: 'Sur l\' air de ...', field: 'sur_l_air_de' },
                             { title: 'Incipit', field: 'incipit' },
                             { title: 'Incipit normalisé', field: 'incipit_normalise' },
+                            { title: 'Auteur', field: 'auteur', render: rowData => getAuteurEdition(rowData)},
                             { title: 'Titre exemplaire', field: 'titre_ouvrage', render: rowData => getExemplaireTitle(rowData) },
                             { title: 'Entrée par ', field: 'provenance', render: rowData => getSearchersNames(rowData) },
                             { title: 'Thèmes', field: 'theme', render: rowData => getThemesNames(rowData) }
