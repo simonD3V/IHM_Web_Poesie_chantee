@@ -143,7 +143,6 @@ function SingleEdition({ history, match }) {
             nombre_pieces
             provenance
             editions_modernes
-            status
             titre_ouvrage
             auteur
             ville_conservation_exemplaire_1
@@ -168,7 +167,7 @@ function SingleEdition({ history, match }) {
                 }
             }
         }
-        textes_publies(filter: {editions: {id: {_eq: "${id}"}}}) {
+        textes_publies(filter: {edition: {id: {_eq: "${id}"}}}) {
             id
             titre
             auteur
@@ -176,7 +175,6 @@ function SingleEdition({ history, match }) {
             incipit
             incipit_normalise
             provenance
-            
         }
     }`
 
@@ -204,7 +202,8 @@ function SingleEdition({ history, match }) {
         let res_textes = []
 
         let initialStr = JSON.stringify(j)
-        let finalStr = initialStr.slice(20, initialStr.length - 2)
+        let finalStr = initialStr.slice(8, initialStr.length - 1)
+
         let lengthData = 0
         // // aller chercher les textes de l'edition sélectionnée
         if (finalStr !== '') {
@@ -212,7 +211,7 @@ function SingleEdition({ history, match }) {
             if (res_tmp['editions'].length) {
                 // update les informations du texte sélectionné
                 // on suppose qu'un seul texte peut être sélectionné dans le résultat de la query et donc que les uuid sont uniques 
-                setDataExemplaire(res_tmp['exemplaires'][0])
+                setDataExemplaire(res_tmp['editions'][0])
             }
             if (res_tmp['textes_publies'].length) {
                 // update les informations des timbres liés au texte sélectionné
@@ -256,6 +255,14 @@ function SingleEdition({ history, match }) {
                          </Typography>
                     </>
                 )
+            case (null) :
+                return (
+                    <>
+                    <Typography color='inherit' align='justify'>
+                        Pas d'information <br/>
+                    </Typography>
+                </>
+                )
             default:
                 return rowData['provenance']
         }
@@ -263,15 +270,16 @@ function SingleEdition({ history, match }) {
 
 
     function getReference() {
-        if (dataExemplaire['reference'].length !== 0) {
-            let l = dataExemplaire['reference'].length
+        if (dataExemplaire['references_externes'].length !== 0) {
+            let l = dataExemplaire['references_externes'].length
             let res = '['
             for (var i = 0; i < l; i++) {
-                res = res.concat(JSON.stringify(dataExemplaire['reference'][i]['references_externes_id']))
+                res = res.concat(JSON.stringify(dataExemplaire['references_externes'][i]['references_externes']))
                 res = res.concat(',')
             }
             res = res.substring(0, res.length - 1)
             res = res.concat(']')
+            console.log(JSON.parse(res))
             return (JSON.parse(res))
         }
     }
@@ -356,7 +364,7 @@ function SingleEdition({ history, match }) {
             <Box className={classes.marginTitle}>
                 <Typography variant='h6' color='textSecondary' align='justify'  >
                     {console.log(dataExemplaire)}
-                    Table des exemplaires
+                    Table des éditions
                 </Typography>
                 <Typography color='inherit' variant='h3' align='justify'>
                     {dataExemplaire['id']}
@@ -396,7 +404,8 @@ function SingleEdition({ history, match }) {
                             Ville de conservation
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
-                            {dataExemplaire['ville_conservation'] ? dataExemplaire["ville_conservation"] : 'Pas de ville'}
+                            {dataExemplaire['ville_conservation_exemplaire_1'] ? dataExemplaire["ville_conservation_exemplaire_1"] : 'Pas de ville'}
+                            {/* rajouter les autres villes */}
                         </Typography>
                     </Grid>
                     <Grid item xs className={classes.margin}>
@@ -404,7 +413,8 @@ function SingleEdition({ history, match }) {
                             Depôt de conservation
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
-                            {dataExemplaire['depot_conservation'] ? dataExemplaire["depot_conservation"] : 'Pas de lieu'}
+                            {dataExemplaire['depot_conservation_exemplaire_1'] ? dataExemplaire["depot_conservation_exemplaire_1"] : 'Pas de lieu'}
+                            {/* rajouter les autres lieux */}
                         </Typography>
                     </Grid>
                     <Grid item xs className={classes.margin}>
@@ -412,7 +422,7 @@ function SingleEdition({ history, match }) {
                             Auteur de l'ouvrage
                             </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
-                            {data['auteur'] ? data["auteur"] : 'Pas d\'auteur'}
+                            {dataExemplaire['auteur'] ? dataExemplaire["auteur"] : 'Pas d\'auteur'}
                         </Typography>
                     </Grid>
                     <Grid item xs className={classes.margin} >
@@ -480,7 +490,7 @@ function SingleEdition({ history, match }) {
                     aria-labelledby="nested-list-subheader"
                     subheader={
                         <ListSubheader component="div" id="nested-list-subheader">
-                            Nom des tables en relation avec cet exemplaire
+                            Nom des tables en relation avec cette édition
                         </ListSubheader>
                     }
                 >
@@ -492,7 +502,7 @@ function SingleEdition({ history, match }) {
                         <ListItemIcon>
                             <Icon class="fas fa-feather" />
                         </ListItemIcon>
-                        <ListItemText primary="Textes de l'exemplaire" />
+                        <ListItemText primary="Textes de l'édition"/>
                         {openTextes ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openTextes} timeout="auto" unmountOnExit>
@@ -557,7 +567,7 @@ function SingleEdition({ history, match }) {
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataExemplaire['reference'] ? (
+                        {dataExemplaire['references_externes'] ? (
                             <MaterialTable
                                 localization={{
                                     body: {
