@@ -351,7 +351,7 @@ function SingleAir({ history, match }) {
                                     if (evt.target.nodeName === 'TD') {
                                         const selected_id = selectedRow['id']
                                         console.log(selected_id)
-                                        history.push('/single_texte/' + selected_id)
+                                        history.push('/single_texte_publie/' + selected_id)
                                     }
                                 })}
                                 options={{
