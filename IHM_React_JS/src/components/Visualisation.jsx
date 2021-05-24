@@ -385,89 +385,178 @@ function Visualisation({ history, match }) {
   return (
     <div>
       {displayGraph ? (
-        <Grid container spacing={2}
-          direction="row"
-          justify="center"
-          alignItems="justify" >
-          <Grid item xs={5}>
-            <Paper elevation={3} className={classes.paperBrown}>
-              Légende du graphe
+        <>
+          <Grid container spacing={2}
+            direction="row"
+            justify="center"
+            alignItems="justify" >
+            <Grid item xs={5}>
+              <Paper elevation={3} className={classes.paperBrown}>
+                Légende du graphe
             </Paper>
-            <Paper elevation={3} className={classes.paperWhite}>
+              <Paper elevation={3} className={classes.paperWhite}>
 
-              <List className={classes.root}>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {circle_air}
-                    </Avatar>
-                  </ListItemAvatar>
-                  {/* {console.log(dataInter)} */}
-                  <ListItemText primary="Airs" secondary={dataInter['airs'].length + " élément"} />
-                </ListItem>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {circle_textes_publies}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary="Textes publiés" secondary={dataInter['textes_publies'].length + " éléments"} />
-                </ListItem>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {circle_editions}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary="Editions" secondary={dataInter['editions'].length + " éléments"} />
-                </ListItem>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {circle_references}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary="Références" secondary={dataInter['references_externes'].length + " éléments"} />
-                </ListItem>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>
-                      {circle_themes}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary="Thèmes" secondary={dataInter['themes'].length + " éléments"} />
-                </ListItem>
-              </List>
+                <List className={classes.root}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {circle_air}
+                      </Avatar>
+                    </ListItemAvatar>
+                    {/* {console.log(dataInter)} */}
+                    <ListItemText primary="Airs" secondary={dataInter['airs'].length + " élément"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {circle_textes_publies}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Textes publiés" secondary={dataInter['textes_publies'].length + " éléments"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {circle_editions}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Editions" secondary={dataInter['editions'].length + " éléments"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {circle_references}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Références" secondary={dataInter['references_externes'].length + " éléments"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar>
+                        {circle_themes}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary="Thèmes" secondary={dataInter['themes'].length + " éléments"} />
+                  </ListItem>
+                </List>
+              </Paper>
+            </Grid>
+            <Grid item xs>{/* col 2 */}
+              <Sigma
+                graph={dataTransformed}
+                settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
+                style={{
+                  height: '595px',
+                  maxWidth: 'inherit'
+                }}
+                onClickNode={e => {
+                  setClickedData([e.data.node.id, e.data.node.label])
+                }
+                }
+              >
+                <RandomizeNodePositions>
+                  <ForceAtlas2
+                    iterationsPerRender={1}
+                    linLogMode
+                    timeout={1000}
+                    worker
+                  />
+                  <RelativeSize initialSize={15} />
+                </RandomizeNodePositions>
+              </Sigma>
+            </Grid>
+          </Grid>
+          <Box
+            pb={15}
+          >
+            <Grid container spacing={2}
+              direction="row"
+              justify="right"
+              alignItems="justify" >
+              <Grid item xs={5}>
+                <Paper elevation={3} className={classes.paperBrown}>
+                  Description de l'objet sélectionné
             </Paper>
-
-          </Grid>
-          <Grid item xs>{/* col 2 */}
-            <Sigma
-              graph={dataTransformed}
-              settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
-              style={{
-                height: '595px',
-                maxWidth: 'inherit'
-              }}
-              onClickNode={e => {
-                setClickedData([e.data.node.id, e.data.node.label])
-              }
-              }
-            >
-              <RandomizeNodePositions>
-                <ForceAtlas2
-                  iterationsPerRender={1}
-                  linLogMode
-                  timeout={1000}
-                  worker
-                />
-                <RelativeSize initialSize={15} />
-              </RandomizeNodePositions>
-            </Sigma>
-          </Grid>
-        </Grid>
+                <Paper elevation={3} className={classes.paperWhite}>
+                  {clickedData.length === 0 ? (
+                    <i>Aucune donnée sélectionnée</i>
+                  ) : (
+                      <>
+                        <Grid container spacing={2}
+                          direction="row"
+                          justify="right"
+                          alignItems="justify" >
+                          <Grid item xs={8}>
+                            <Box pb={2}>
+                              {clickedData[0].split('__')[0] === 'airs' && (<ListItem>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    {circle_air}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary="Airs" />
+                              </ListItem>
+                              )}
+                              {clickedData[0].split('__')[0] === 'textes_publies' && (<ListItem>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    {circle_textes_publies}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary="Textes publiés" />
+                              </ListItem>
+                              )}
+                              {clickedData[0].split('__')[0] === 'editions' && (<ListItem>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    {circle_editions}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary="Editions" />
+                              </ListItem>
+                              )}
+                              {clickedData[0].split('__')[0] === 'references_externes' && (<ListItem>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    {circle_references}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary="Références externes" />
+                              </ListItem>
+                              )}
+                              {clickedData[0].split('__')[0] === 'themes' && (<ListItem>
+                                <ListItemAvatar>
+                                  <Avatar>
+                                    {circle_themes}
+                                  </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText primary="Thèmes" />
+                              </ListItem>
+                              )}
+                            </Box>
+                            <Typography variant='subtitle2' color='textSecondary' align='left'>
+                              Identifiant :
+                        </Typography>
+                            <Typography variant='body1' color='textPrimary' align='left'>
+                              {clickedData[0].split('__')[1]}
+                            </Typography>
+                            <Box pb={2} />
+                            <Typography variant='body1' color='textPrimary' align='left'>
+                              <i>{clickedData[1]}</i>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs>
+                            <Button variant="contained" onClick={() => getRedirected()}>Consulter</Button>
+                          </Grid>
+                        </Grid>
+                      </>
+                    )}
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
+        </>
       ) : (
-
           <Box
             display="flex"
             width='100%'
@@ -484,95 +573,7 @@ function Visualisation({ history, match }) {
           </Box>
 
         )}
-      <Box
-        pb={20}
-      >
-        <Grid container spacing={2}
-          direction="row"
-          justify="right"
-          alignItems="justify" >
-          <Grid item xs={5}>
-            <Paper elevation={3} className={classes.paperBrown}>
-              Description de l'objet sélectionné
-            </Paper>
-            <Paper elevation={3} className={classes.paperWhite}>
-              {clickedData.length === 0 ? (
-                <i>Aucune donnée sélectionnée</i>
-              ) : (
-                  <>
-                    <Grid container spacing={2}
-                      direction="row"
-                      justify="right"
-                      alignItems="justify" >
-                      <Grid item xs={8}>
-                        <Box pb={2}>
-                          {clickedData[0].split('__')[0] === 'airs' && (<ListItem>
-                            <ListItemAvatar>
-                              <Avatar>
-                                {circle_air}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Airs"/>
-                          </ListItem>
-                          )}
-                          {clickedData[0].split('__')[0] === 'textes_publies' && (<ListItem>
-                            <ListItemAvatar>
-                              <Avatar>
-                                {circle_textes_publies}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Textes publiés"/>
-                          </ListItem>
-                          )}
-                          {clickedData[0].split('__')[0] === 'editions' && (<ListItem>
-                            <ListItemAvatar>
-                              <Avatar>
-                                {circle_editions}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Editions"/>
-                          </ListItem>
-                          )}
-                          {clickedData[0].split('__')[0] === 'references_externes' && (<ListItem>
-                            <ListItemAvatar>
-                              <Avatar>
-                                {circle_references}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Références externes"/>
-                          </ListItem>
-                          )}
-                          {clickedData[0].split('__')[0] === 'themes' && (<ListItem>
-                            <ListItemAvatar>
-                              <Avatar>
-                                {circle_themes}
-                              </Avatar>
-                            </ListItemAvatar>
-                            <ListItemText primary="Thèmes"/>
-                          </ListItem>
-                          )}
-                        </Box>
-                        <Typography variant='subtitle2' color='textSecondary' align='left'>
-                          Identifiant :
-                        </Typography>
-                        <Typography variant='body1' color='textPrimary' align='left'>
-                          {clickedData[0].split('__')[1]}
-                        </Typography>
-                        <Box pb={2} />
-                        <Typography variant='body1' color='textPrimary' align='left'>
-                          <i>{clickedData[1]}</i>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs>
-                        <Button variant="contained" onClick={() => getRedirected()}>Consulter</Button>
-                      </Grid>
-                    </Grid>
-                  </>
-                )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
+
     </div >
   )
 }
