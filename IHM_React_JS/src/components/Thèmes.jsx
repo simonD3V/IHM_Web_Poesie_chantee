@@ -98,19 +98,17 @@ function Themes() {
     const [data, setData] = useState([])
 
     const query = `{
-        items {
-          themes {
+        themes {
             id
             theme
             type
-          }
         }
       }
       `
 
-    useEffect(() => {
+      useEffect(() => {
         (async () => {
-            let d = await fetch('http://localhost:8055/graphql/', {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,8 +126,8 @@ function Themes() {
     function dataThemes() {
         let res = []
         let initialStr = JSON.stringify(data)
-        let finalStr = initialStr.slice(27, initialStr.length - 3)
-        console.log(finalStr)
+        let finalStr = initialStr.slice(18, initialStr.length - 2)
+
         console.log(finalStr)
         if (finalStr !== '') {
             res = JSON.parse(finalStr)
@@ -144,10 +142,10 @@ function Themes() {
             alignItems="center">
             <Grid item xs={12} >
                 <Typography variant='h5' align='center'>
-                    Projet Timbres : 'Textes publiés'
+                    Projet Timbres : 'Thèmes'
                 </Typography>
                 <Typography variant='body1' color='textSecondary' align='center'>
-                    Description de la table des textes publiés
+                    Description de la table des thèmes
                 </Typography>
             </Grid>
             <Grid item xs={12}>
