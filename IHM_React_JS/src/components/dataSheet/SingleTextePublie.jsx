@@ -406,7 +406,7 @@ function SingleTextePublie({ history, match }) {
             <Box className={classes.marginTitle}>
                 <Typography variant='h6' color='textSecondary' align='justify'  >
                     Table des textes
-                    {console.log(dataTexte)}
+                    {console.log(data)}
                 </Typography>
                 <Typography color='inherit' variant='subtitle2' align='justify'>
                     {dataTexte['id']}
@@ -697,7 +697,7 @@ function SingleTextePublie({ history, match }) {
                                     if (evt.target.nodeName === 'TD') {
                                         const selected_id = selectedRow['id']
                                         console.log(selected_id)
-                                        history.push('/single_exemplaire/' + selected_id)
+                                        history.push('/single_edition/' + selected_id)
                                     }
                                 })}
                                 options={{
@@ -726,11 +726,10 @@ function SingleTextePublie({ history, match }) {
                             <Icon class="fas fa-book-open" />
                         </ListItemIcon>
                         <ListItemText primary="Références" />
-                        {console.log(getReference())}
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataTexte['references_externes'] ? (
+                        {dataTexte['references_externes'] && (dataTexte['references_externes'].length!==0  ? (
                             <MaterialTable
                                 localization={{
                                     body: {
@@ -776,7 +775,7 @@ function SingleTextePublie({ history, match }) {
                                 <Typography variant='h6' color='inherit' align='center'>
                                     Aucune référence
                                 </Typography>
-                            )}
+                            ))}
                     </Collapse>
                 </List>
             </Box>
