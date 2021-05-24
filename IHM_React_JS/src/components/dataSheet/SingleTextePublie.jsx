@@ -730,7 +730,7 @@ function SingleTextePublie({ history, match }) {
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {getReference() ? (
+                        {dataTexte['references_externes'] ? (
                             <MaterialTable
                                 localization={{
                                     body: {
