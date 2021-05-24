@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Avatar, Box, CircularProgress, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper } from '@material-ui/core'
+import { Avatar, Box, CircularProgress, List, ListItem, ListItemAvatar, ListItemText, makeStyles, Paper, Typography } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid';
 import { withRouter } from 'react-router-dom';
 import { Sigma, RandomizeNodePositions, RelativeSize } from 'react-sigma';
@@ -107,30 +107,109 @@ function Visualisation() {
   const [dataInter, setDataInter] = useState([])
   const [dataTransformed, setDataTransformation] = useState([])
   const [displayGraph, setDisplayGraph] = useState(false)
+  const [clickedData, setClickedData] = useState([])
 
   const query = `{
       airs(limit: 1000) {
         id
+        sources_musicales
         air_normalise
+        surnom_1
+        textes_publies {
+            textes_publies {
+                id
+                titre
+            }
+        }
       }
       references_externes(limit: 1000) {
-        titre
         id
+        lien
+        titre
+        annee
+        editeur
+        auteur
       }
       textes_publies(limit: 1000) {
         id
         titre
+        sur_l_air_de
+        incipit
+        incipit_normalise
+        provenance
+        auteur
+        auteur_statut_source
+        auteur_source_information
         edition {
-            id
+          id
+          editeur_source_information
+          libraire
+          imprimeur
+          editeur
+          religion
+          notes_provenance
+          numero_cote
+          prefixe_cote
+          groupe_ouvrage
+          nombre_pieces
+          provenance
+          editions_modernes
+          titre_ouvrage
+          auteur
+          ville_conservation_exemplaire_1
+          depot_conservation_exemplaire_1
+          annee_indiquee
+          annee_estimee
+          format
+          manuscrit_imprime
+          forme_editoriale
+          lieu_edition_reel
+          lieu_edition_indique
+          lieu_edition_source_information
+          editeur_libraire_imprimeur
         }
+        variante
+        variante_normalise
+        page
+        contenu_texte
+        numero_d_ordre
+        lien_web_visualisation
+        contenu_analytique
+        forme_poetique
+        notes_forme_poetique
       }
       themes(limit: 1000) {
         theme
+        type
         id
       }
       editions(limit: 1000) {
-        titre_ouvrage
         id
+        editeur_source_information
+        libraire
+        imprimeur
+        editeur
+        religion
+        notes_provenance
+        numero_cote
+        prefixe_cote
+        groupe_ouvrage
+        nombre_pieces
+        provenance
+        editions_modernes
+        titre_ouvrage
+        auteur
+        ville_conservation_exemplaire_1
+        depot_conservation_exemplaire_1
+        annee_indiquee
+        annee_estimee
+        format
+        manuscrit_imprime
+        forme_editoriale
+        lieu_edition_reel
+        lieu_edition_indique
+        lieu_edition_source_information
+        editeur_libraire_imprimeur
       }
       timbres(limit: 1000) {
         id
@@ -213,20 +292,20 @@ function Visualisation() {
       res = res.concat('{ "nodes" : [ ')
       for (var n = 0; n < nodes.length; n++) {
         for (var i = 0; i < d[nodes[n]].length; i++) {
-          if (nodes[n]==='airs') {
-            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['air_normalise'] + '", "color" : "' + color[n] + '" }') 
+          if (nodes[n] === 'airs') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['air_normalise'] + '", "color" : "' + color[n] + '" }')
           }
-          if (nodes[n]==='textes_publies') { 
-            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }') 
+          if (nodes[n] === 'textes_publies') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }')
           }
-          if (nodes[n]==='references_externes') { 
-            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }') 
+          if (nodes[n] === 'references_externes') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre'] + '", "color" : "' + color[n] + '" }')
           }
-          if (nodes[n]==='themes') { 
-            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['theme'] + '", "color" : "' + color[n] + '" }') 
+          if (nodes[n] === 'themes') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['theme'] + '", "color" : "' + color[n] + '" }')
           }
-          if (nodes[n]==='editions') { 
-            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre_ouvrage'] + '", "color" : "' + color[n] + '" }') 
+          if (nodes[n] === 'editions') {
+            res = res.concat('{ "id" : "' + d[nodes[n]][i]['id'] + '", "label" : "' + d[nodes[n]][i]['titre_ouvrage'] + '", "color" : "' + color[n] + '" }')
           }
           if (i !== d[nodes[n]].length) {
             res = res.concat(', ')
@@ -263,12 +342,12 @@ function Visualisation() {
       for (var e = 0; e < d[nodes[1]].length; e++) {
         res = res.concat('{ "id" : "' + e + '", "source" : "' + d[nodes[1]][e]['id'] + '", "target" : "' + d[nodes[1]][e]['edition']['id'] + '", "color" : "#CFCFCF" }, ')
       }
-        res = res.substring(0, res.length - 2)
-        res = res.concat(']}')
-        let res_json = JSON.parse(res)
-        setDataTransformation(res_json)
-        console.log(res)
-        console.log(res_json)
+      res = res.substring(0, res.length - 2)
+      res = res.concat(']}')
+      let res_json = JSON.parse(res)
+      setDataTransformation(res_json)
+      console.log(res)
+      console.log(res_json)
 
     }
   }
@@ -340,11 +419,15 @@ function Visualisation() {
           <Grid item xs>{/* col 2 */}
             <Sigma
               graph={dataTransformed}
-              settings={{ drawEdges: true, clone: false }}
+              settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
               style={{
                 height: '595px',
                 maxWidth: 'inherit'
               }}
+              onClickNode={e => {
+                setClickedData([e.data.node.id, e.data.node.label])
+              }
+              }
             >
               <RandomizeNodePositions>
                 <ForceAtlas2
@@ -376,6 +459,40 @@ function Visualisation() {
           </Box>
 
         )}
+      <Box
+        pb={20}
+      >
+        <Grid container spacing={2}
+          direction="row"
+          justify="right"
+          alignItems="justify" >
+          <Grid item xs={5}>
+            <Paper elevation={3} className={classes.paperBrown}>
+              Description de l'objet sélectionné
+            </Paper>
+            <Paper elevation={3} className={classes.paperWhite}>
+              {console.log(clickedData)}
+              {clickedData.length === 0 ? (
+                <i>Aucune donnée sélectionnée</i>
+              ) : (
+                  <>
+                    <Typography variant='subtitle2' color='textSecondary' align='left'>
+                      Identifiant :
+                  </Typography>
+                    <Typography variant='body1' color='textPrimary' align='left'>
+                      {clickedData[0]}
+                      {console.log(dataInter)}
+                    </Typography>
+                    <Box pb={2} />
+                    <Typography variant='body1' color='textPrimary' align='left'>
+                      <i>{clickedData[1]}</i>
+                    </Typography>
+                  </>
+                )}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
     </div >
   )
 }
