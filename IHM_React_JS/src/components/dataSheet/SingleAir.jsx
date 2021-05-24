@@ -262,7 +262,7 @@ function SingleAir({ history, match }) {
                     </Grid>
                     <Grid item xs className={classes.margin} >
                         <Typography variant='body1' color='textSecondary' align='justify'>
-                            Surnoms
+                            Surnom(s)
                         </Typography>
                         <Typography variant='h6' color='inherit' align='justify'>
                             {dataAir['surnom_1'] ? (dataAir["surnom_1"]) : 'Champs manquant'}
