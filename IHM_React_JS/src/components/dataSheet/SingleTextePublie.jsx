@@ -726,10 +726,11 @@ function SingleTextePublie({ history, match }) {
                             <Icon class="fas fa-book-open" />
                         </ListItemIcon>
                         <ListItemText primary="Références" />
+                        {console.log(getReference())}
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataTexte['references_externes'] ? (
+                        {getReference() ? (
                             <MaterialTable
                                 localization={{
                                     body: {
