@@ -1,6 +1,7 @@
-import { Box, CircularProgress, Collapse, Grid, Icon, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, Typography } from '@material-ui/core'
+import { Box, CircularProgress, Collapse, Grid, Icon, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, Slider, Paper, Typography } from '@material-ui/core'
 import { AddBox, ArrowDownward, Check, ChevronLeft, ChevronRight, Clear, DeleteOutline, Edit, ExpandLess, ExpandMore, FilterList, FirstPage, LastPage, Remove, SaveAlt, Search, ViewColumn } from '@material-ui/icons';
 import MaterialTable from 'material-table';
+import { withStyles } from '@material-ui/core/styles';
 import React, { forwardRef, useEffect, useState } from 'react'
 import { withRouter } from 'react-router'
 
@@ -67,6 +68,23 @@ const useStyles = makeStyles((theme) => ({
     active: {
         backgroundColor: "red"
     },
+    paperBrown: {
+        maxWidth: '25%',
+        margin: `${theme.spacing(1)}px auto`,
+        padding: theme.spacing(2),
+        textAlign: 'justify',
+        backgroundColor: '#AC8E7A',
+        color: 'white',
+    },
+    paperWhite: {
+        maxWidth: '80%',
+        margin: `${theme.spacing(1)}px auto`,
+        padding: theme.spacing(2),
+        textAlign: 'center',
+        height: '80%',
+        backgroundColor: 'white',
+        color: 'black',
+    },
 }));
 
 const useStylesFacebook = makeStyles((theme) => ({
@@ -89,6 +107,36 @@ const useStylesFacebook = makeStyles((theme) => ({
         color: '#CFAB92',
     },
 }));
+
+const CustomSlider = withStyles({
+    root: {
+        color: '#CFB1A0',
+        height: 8,
+    },
+    thumb: {
+        height: 24,
+        width: 24,
+        backgroundColor: '#fff',
+        border: '2px solid currentColor',
+        marginTop: -8,
+        marginLeft: -12,
+        '&:focus, &:hover, &$active': {
+            boxShadow: 'inherit',
+        },
+    },
+    active: {},
+    valueLabel: {
+        left: 'calc(-50% + 4px)',
+    },
+    track: {
+        height: 8,
+        borderRadius: 4,
+    },
+    rail: {
+        height: 8,
+        borderRadius: 4,
+    },
+})(Slider);
 
 function FacebookCircularProgress(props) {
     const classes = useStylesFacebook();
@@ -115,8 +163,11 @@ function SingleTextePublie({ history, match }) {
     const id = match.params.id;
     const [data, setData] = useState([])
 
-    const [dataTexte, setDataTexte] = useState([])       // contient les informations du texte sélectionné
+    const [dataTexte, setDataTexte] = useState([])      // contient les informations du texte sélectionné
     const [dataTimbres, setDataTimbres] = useState([])  // contient des timbres liés au texte sélectionné
+    const [graphData, setGraphData] = useState([])      // contient les données transformées pour la génération du graphe
+    const [neighbourNbr, setNeighbourNbr] = useState(2)
+
 
     const [openAirs, setOpenAirs] = useState(false)
     const handleClickAirs = () => {
@@ -216,6 +267,7 @@ function SingleTextePublie({ history, match }) {
     }      
     `
 
+    
     useEffect(() => {
         (async () => {
             let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
@@ -231,6 +283,7 @@ function SingleTextePublie({ history, match }) {
             let j = await d.json()
             setData(j)
             transformData(j)
+            // transformGraphData(j, neighbourNbr)
         })()
     }, [query])
 
@@ -267,6 +320,10 @@ function SingleTextePublie({ history, match }) {
                 }
             }
         }
+    }
+
+    function transformGraphData(j) {
+
     }
 
     function getSearchersNames() {                                // renvoie le nom complet du champ provenance
@@ -399,6 +456,10 @@ function SingleTextePublie({ history, match }) {
             return (JSON.parse(res))
         }
     }
+
+    const handleChange = (event, newValue) => {
+        setNeighbourNbr(newValue);
+    };
 
     return (
         <div className={classes.root} >
@@ -586,6 +647,54 @@ function SingleTextePublie({ history, match }) {
                 </Typography>
             </Grid>
             <Box pt={0} pb={5} className={classes.borderBot} />
+
+            {/* Graphe local */}
+            <Box pt={10} pb={5}>
+                <Paper className={classes.paperBrown}>
+                    <Typography variant='body1' color='white' align='center'>
+                        Nombre d'objets en relation avec ce texte
+                    </Typography>
+                    <CustomSlider
+                        defaultValue={2}
+                        aria-labelledby="discrete-slider-small-steps"
+                        step={1}
+                        marks
+                        min={1}
+                        max={4}
+                        valueLabelDisplay="auto"
+                        onChange={handleChange}
+                    />
+                </Paper>
+                <Box pb={35} />
+                {/* <Sigma
+                        graph={graphData}
+                        settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
+                        style={{
+                            height: '595px',
+                            maxWidth: 'inherit'
+                        }}
+                        onClickNode={e => {
+                            setClickedData([e.data.node.id, e.data.node.label])
+                        }
+                        }
+                    >
+                        <RandomizeNodePositions>
+                            <ForceAtlas2
+                                iterationsPerRender={1}
+                                linLogMode
+                                timeout={1000}
+                                worker
+                            />
+                            <RelativeSize initialSize={15} />
+                        </RandomizeNodePositions>
+                    </Sigma> */}
+                <Paper className={classes.paperBrown}>
+                    <Typography variant='body1' color='textPrimary' align='center'>
+                        Fiche descriptive
+                    </Typography>
+                </Paper>
+            </Box>
+
             <Box pt={0} pb={10} className={classes.tablesRelation}>
                 <Typography variant='h6' color='inherit' align='justify'>
                     Données liées :
@@ -729,7 +838,7 @@ function SingleTextePublie({ history, match }) {
                         {openReference ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataTexte['references_externes'] && (dataTexte['references_externes'].length!==0  ? (
+                        {dataTexte['references_externes'] && (dataTexte['references_externes'].length !== 0 ? (
                             <MaterialTable
                                 localization={{
                                     body: {
