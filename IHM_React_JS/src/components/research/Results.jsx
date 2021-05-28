@@ -262,7 +262,7 @@ function Results({ res }) {
                                                             {titre ? titre : 'Aucun titre'}
                                                         </Typography>
                                                         <Typography variant='subtitle2' color='textSecondary' align='justify'>
-                                                            {auteur ? auteur : 'Champs manquant'}
+                                                            {auteur ? auteur : 'Champ manquant'}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs>
@@ -280,7 +280,7 @@ function Results({ res }) {
                         </Collapse>
                     </>
                 )}
-                {/* affichage exemplaires */}
+                {/* affichage editions */}
                 {getSeries()[4] !== 0 && (
                     <>
                         <ListItem
@@ -295,7 +295,7 @@ function Results({ res }) {
                             <ListItemIcon>
                                 <Icon class="fas fa-book" style={{ color: 'white' }} />
                             </ListItemIcon>
-                            <ListItemText primary="Exemplaires" />
+                            <ListItemText primary="Editions" />
                             {openExemplaires ? <ExpandMore /> : <ExpandLess />}
                         </ListItem>
 
@@ -305,7 +305,7 @@ function Results({ res }) {
                                     {getSeries()[4] !== 1 ? getSeries()[4] + ' résultats trouvés' : getSeries()[4] + ' résultat trouvé'}
                                 </ListSubheader>
                                 <Fragment>
-                                    {_res['exemplaires'].map(({ id, titre_ouvrage, auteur }, index) => (
+                                    {_res['editions'].map(({ id, titre_ouvrage, auteur }, index) => (
                                         <div key={index}>
                                             <Paper elevation={3} className={classes.paperResult}>
                                                 <Grid container spacing={2}
@@ -322,7 +322,7 @@ function Results({ res }) {
                                                             {titre_ouvrage ? titre_ouvrage : 'Aucun titre'}
                                                         </Typography>
                                                         <Typography variant='subtitle2' color='textSecondary' align='justify'>
-                                                            {auteur ? auteur : 'Champs manquant'}
+                                                            {auteur ? auteur : 'Champ manquant'}
                                                         </Typography>
                                                     </Grid>
                                                     <Grid item xs>
@@ -478,6 +478,7 @@ function Results({ res }) {
                 {res.length !== 0 && (
                     <Grid item xs>
                         <Paper elevation={0} className={classes.paperGraph}>
+                            {console.log(getSeries())}
                             <Donut series={getSeries()} labels={getLabel()} />
                         </Paper>
                     </Grid>
