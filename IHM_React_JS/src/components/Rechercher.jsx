@@ -264,7 +264,7 @@ function Rechercher() {
                 'Accept': 'application/json',
             }
         })
-        let fetchExemplaires = await fetch(`http://bases-iremus.huma-num.fr/directus-tcf/items/editions?search=${word}`, {
+        let fetchEditions = await fetch(`http://bases-iremus.huma-num.fr/directus-tcf/items/editions?search=${word}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -287,14 +287,12 @@ function Rechercher() {
         })
         let airs_json = await fetchAirs.json()
         let textes_publies_json = await fetchTextesPublies.json()
-        let exemplaires_json = await fetchExemplaires.json()
+        let editions_json = await fetchEditions.json()
         let references_externes_json = await fetchReferences.json()
         let themes_json = await fetchThemes.json()
 
-        return [airs_json, textes_publies_json, exemplaires_json, references_externes_json, themes_json]
+        return [airs_json, textes_publies_json, editions_json, references_externes_json, themes_json]
 
-        // let fetchTextes
-        // let fetchExemplaires
     }
     async function research() {
         {console.log(basicSearch)}
@@ -312,8 +310,8 @@ function Rechercher() {
             console.log('word : ' + word)
 
             // fetch dans toutes les tables 
-            // ordre : airs - textes - exemplaires - references - themes
-            const tablesName = ['"airs"', '"textes_publies"', '"exemplaires"', '"references_externes"', '"themes"']
+            // ordre : airs - textes - editions - references - themes
+            const tablesName = ['"airs"', '"textes_publies"', '"editions"', '"references_externes"', '"themes"']
             let tmp = await fetchBasicSearch(word)
 
             //redéfinir la structure des données
@@ -409,7 +407,7 @@ function Rechercher() {
                                                 <em>N'importe quel champ</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'exemplaire'}>Editions</MenuItem>
+                                            <MenuItem value={'editions'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>
@@ -447,7 +445,7 @@ function Rechercher() {
                                                 <em>N'importe quel champs</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'exemplaire'}>Editions</MenuItem>
+                                            <MenuItem value={'editions'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>
@@ -484,7 +482,7 @@ function Rechercher() {
                                                 <em>N'importe quel champs</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'exemplaire'}>Editions</MenuItem>
+                                            <MenuItem value={'editions'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>
