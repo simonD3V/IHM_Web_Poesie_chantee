@@ -79,7 +79,7 @@ function Results({ res }) {
     function getSeries() {
         let length_textes_publies = 0
         let length_airs = 0
-        let length_exemplaires = 0
+        let length_editions = 0
         let length_references_externes = 0
         let length_themes = 0
         if (res) {
@@ -89,8 +89,8 @@ function Results({ res }) {
             if (res['data']['items']['textes_publies']) {
                 length_textes_publies = res['data']['items']['textes_publies'].length
             }
-            if (res['data']['items']['exemplaires']) {
-                length_exemplaires = res['data']['items']['exemplaires'].length
+            if (res['data']['items']['editions']) {
+                length_editions = res['data']['items']['editions'].length
             }
             if (res['data']['items']['references_externes']) {
                 length_references_externes = res['data']['items']['references_externes'].length
@@ -98,13 +98,13 @@ function Results({ res }) {
             if (res['data']['items']['themes']) {
                 length_themes = res['data']['items']['themes'].length
             }
-            return [length_airs, length_textes_publies, length_references_externes, length_themes, length_exemplaires]
+            return [length_airs, length_textes_publies, length_references_externes, length_themes, length_editions]
 
         }
     }
 
     function getLabel() {
-        return ['Airs', 'Textes publiés', 'Références', 'Thèmes', 'Exemplaires']
+        return ['Airs', 'Textes publiés', 'Références', 'Thèmes', 'Editions']
     }
 
     const [openAirs, setOpenAirs] = useState(false)
@@ -142,7 +142,7 @@ function Results({ res }) {
             history.push('/single_texte_publie/' + selected_id)
         }
         function displaySingleExemplaire(selected_id) {
-            history.push('/single_exemplaire/' + selected_id)
+            history.push('/single_edition/' + selected_id)
         }
         function displaySingleReference(selected_id) {
             history.push('/single_reference/' + selected_id)
