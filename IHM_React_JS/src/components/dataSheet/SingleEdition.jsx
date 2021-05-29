@@ -366,7 +366,7 @@ function SingleEdition({ history, match }) {
                     {console.log(dataExemplaire)}
                     Table des éditions
                 </Typography>
-                <Typography color='inherit' variant='h3' align='justify'>
+                <Typography color='inherit' variant='h6' align='justify'>
                     {dataExemplaire['id']}
                 </Typography>
             </Box>
@@ -380,7 +380,7 @@ function SingleEdition({ history, match }) {
                         <Typography variant='h6' color='textSecondary' align='justify'>
                             Titre de l'ouvrage
                         </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
+                        <Typography variant='h3' color='inherit' align='justify'>
                             <i>{dataExemplaire['titre_ouvrage']}</i>
                         </Typography>
                     </Grid>
