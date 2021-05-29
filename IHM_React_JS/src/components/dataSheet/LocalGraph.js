@@ -56,7 +56,13 @@ function LocalGraph(j, j_graph, table) {
             textes_airs_voisins = textes_airs_voisins.substring(0, textes_airs_voisins.length - 2)
             textes_airs_voisins = JSON.parse(textes_airs_voisins + ']')
             for (i = 0; i < textes_airs_voisins.length; i++) {
-                res_nodes = res_nodes.concat('{ "id" : "textes_publies__' + textes_airs_voisins[i]['id'] + '", "label" : "' + textes_airs_voisins[i]['titre'] + '", "color" : "' + color[1] + '", "size" : 0.4 }, ')
+                // il arrive qu'un texte voisin par l'air soit également un texte voisin par l'édition
+                for (k=0; k<textes_voisins.length; k++) {
+                    if (textes_voisins[k]['id']!==textes_airs_voisins[i]['id']){
+                        res_nodes = res_nodes.concat('{ "id" : "textes_publies__' + textes_airs_voisins[i]['id'] + '", "label" : "' + textes_airs_voisins[i]['titre'] + '", "color" : "' + color[1] + '", "size" : 0.4 }, ') 
+                    }
+                    break
+                }
             }
         }
         res_nodes = res_nodes.substring(0, res_nodes.length - 2)
@@ -87,6 +93,7 @@ function LocalGraph(j, j_graph, table) {
 
         res_links = res_links.substring(0, res_links.length - 2)
         let res = res_nodes + res_links + ']}'
+        console.log(JSON.parse(res))
 
         return JSON.parse(res)
     }
