@@ -714,9 +714,9 @@ function SingleTextePublie({ history, match }) {
                             <Grid item xs className={classes.margin} >
                                 <Typography variant='h  6' color='textSecondary' align='justify'>
                                     Titre du texte
-                        </Typography>
+                                </Typography>
                                 <Typography variant='h3' color='inherit' align='justify'>
-                                    <i>{dataTexte['titre']}</i>
+                                    {dataTexte['titre']!=="" ? (<i>{dataTexte['titre']}</i>) :  (<i>Champ manquant</i>)}
                                 </Typography>
                             </Grid>
                             <Grid item xs className={classes.margin}>
