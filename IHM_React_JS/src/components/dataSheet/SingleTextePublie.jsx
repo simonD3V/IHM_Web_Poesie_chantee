@@ -1,9 +1,14 @@
-import { Box, CircularProgress, Collapse, Grid, Icon, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, Slider, Paper, Typography } from '@material-ui/core'
+import { Box, CircularProgress, Collapse, Grid, Icon, List, ListItem, ListItemIcon, ListItemText, ListSubheader, makeStyles, Slider, Paper, Typography, Avatar, ListItemAvatar } from '@material-ui/core'
 import { AddBox, ArrowDownward, Check, ChevronLeft, ChevronRight, Clear, DeleteOutline, Edit, ExpandLess, ExpandMore, FilterList, FirstPage, LastPage, Remove, SaveAlt, Search, ViewColumn } from '@material-ui/icons';
 import MaterialTable from 'material-table';
 import { withStyles } from '@material-ui/core/styles';
 import React, { forwardRef, useEffect, useState } from 'react'
 import { withRouter } from 'react-router'
+import LocalGraph from './LocalGraph.js'
+import { Sigma, RandomizeNodePositions, RelativeSize, EdgeShapes } from 'react-sigma';
+import ForceAtlas2 from 'react-sigma/lib/ForceAtlas2';
+import clsx from 'clsx';
+import Button from '@material-ui/core/Button';
 
 const tableIcons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -77,13 +82,46 @@ const useStyles = makeStyles((theme) => ({
         color: 'white',
     },
     paperWhite: {
-        maxWidth: '80%',
+        maxWidth: '60%',
         margin: `${theme.spacing(1)}px auto`,
         padding: theme.spacing(2),
         textAlign: 'center',
         height: '80%',
         backgroundColor: 'white',
         color: 'black',
+    },
+    shape_air: {
+        backgroundColor: '#B1D3DD',
+        width: 40,
+        height: 40,
+    },
+    shape_textes_publies: {
+        backgroundColor: '#B2DA82',
+        width: 40,
+        height: 40,
+    },
+    shape_editions: {
+        backgroundColor: '#80624D',
+        width: 40,
+        height: 40,
+    },
+    shape_references: {
+        backgroundColor: '#FFC300',
+        width: 40,
+        height: 40,
+    },
+    shape_themes: {
+        backgroundColor: '#FF5733',
+        width: 40,
+        height: 40,
+    },
+    shapeCircle: {
+        borderRadius: '50%',
+    },
+    legend: {
+        '& > *': {
+            margin: theme.spacing(1),
+        },
     },
 }));
 
@@ -165,9 +203,9 @@ function SingleTextePublie({ history, match }) {
 
     const [dataTexte, setDataTexte] = useState([])      // contient les informations du texte sélectionné
     const [dataTimbres, setDataTimbres] = useState([])  // contient des timbres liés au texte sélectionné
-    const [graphData, setGraphData] = useState([])      // contient les données transformées pour la génération du graphe
-    const [neighbourNbr, setNeighbourNbr] = useState(2)
-
+    const [areAllDataUpload, setAreAllDataUpload] = useState(false)
+    const [graphData, setGraphData] = useState([])
+    const [clickedData, setClickedData] = useState([])
 
     const [openAirs, setOpenAirs] = useState(false)
     const handleClickAirs = () => {
@@ -252,6 +290,7 @@ function SingleTextePublie({ history, match }) {
             }
         }
         timbres(filter: {textes_publies: {id: {_eq: "${id}"}}}) {
+            id
             textes_publies {
               id
             }
@@ -267,7 +306,165 @@ function SingleTextePublie({ history, match }) {
     }      
     `
 
-    
+    const graph_query = `
+    {
+        airs(limit: 1000) {
+          id
+          sources_musicales
+          air_normalise
+          surnom_1
+          textes_publies {
+              textes_publies {
+                  id
+                  titre
+              }
+          }
+        }
+        references_externes(limit: 1000) {
+          id
+          lien
+          titre
+          annee
+          editeur
+          auteur
+        }
+        textes_publies(limit: 1000) {
+          id
+          titre
+          sur_l_air_de
+          incipit
+          incipit_normalise
+          provenance
+          auteur
+          auteur_statut_source
+          auteur_source_information
+          edition {
+            id
+            editeur_source_information
+            libraire
+            imprimeur
+            editeur
+            religion
+            notes_provenance
+            numero_cote
+            prefixe_cote
+            groupe_ouvrage
+            nombre_pieces
+            provenance
+            editions_modernes
+            titre_ouvrage
+            auteur
+            ville_conservation_exemplaire_1
+            depot_conservation_exemplaire_1
+            annee_indiquee
+            annee_estimee
+            format
+            manuscrit_imprime
+            forme_editoriale
+            lieu_edition_reel
+            lieu_edition_indique
+            lieu_edition_source_information
+            editeur_libraire_imprimeur
+          }
+          variante
+          variante_normalise
+          page
+          contenu_texte
+          numero_d_ordre
+          lien_web_visualisation
+          contenu_analytique
+          forme_poetique
+          notes_forme_poetique
+        }
+        themes(limit: 1000) {
+          theme
+          type
+          id
+        }
+        editions(limit: 1000) {
+          id
+          editeur_source_information
+          libraire
+          imprimeur
+          editeur
+          religion
+          notes_provenance
+          numero_cote
+          prefixe_cote
+          groupe_ouvrage
+          nombre_pieces
+          provenance
+          editions_modernes
+          titre_ouvrage
+          auteur
+          ville_conservation_exemplaire_1
+          depot_conservation_exemplaire_1
+          annee_indiquee
+          annee_estimee
+          format
+          manuscrit_imprime
+          forme_editoriale
+          lieu_edition_reel
+          lieu_edition_indique
+          lieu_edition_source_information
+          editeur_libraire_imprimeur
+        }
+        timbres(limit: 1000) {
+          id
+          airs {
+            id
+          }
+          textes_publies {
+            id
+            titre
+            sur_l_air_de
+            incipit
+            incipit_normalise
+            provenance
+            auteur
+            auteur_statut_source
+            auteur_source_information
+          }
+        }
+        airs_references_externes(limit: 1000) {
+          id
+          airs{
+            id
+          }
+          references_externes(limit: 1000) {
+            id
+          }
+        }
+        editions_references_externes(limit: 1000) {
+          id
+          editions {
+            id
+          }
+          references_externes {
+            id
+          }
+        }
+        textes_publies_references_externes(limit: 1000) {
+          id
+          textes_publies {
+            id
+          }
+          references_externes {
+            id
+          }
+        }
+        textes_publies_themes(limit: 1000) {
+          id
+          textes_publies {
+            id
+          }
+          themes {
+            id
+          }
+        }
+    }`
+
+
     useEffect(() => {
         (async () => {
             let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
@@ -280,12 +477,24 @@ function SingleTextePublie({ history, match }) {
                     query
                 })
             })
+            let g = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: graph_query
+                })
+            })
             let j = await d.json()
+            let j_graph = await g.json()
             setData(j)
             transformData(j)
-            // transformGraphData(j, neighbourNbr)
+            setGraphData(LocalGraph(j, j_graph, 'textes_publies'))
+            setAreAllDataUpload(true)
         })()
-    }, [query])
+    }, [query, graph_query])
 
     function transformData(j) {
         let res_tmp = []
@@ -320,10 +529,6 @@ function SingleTextePublie({ history, match }) {
                 }
             }
         }
-    }
-
-    function transformGraphData(j) {
-
     }
 
     function getSearchersNames() {                                // renvoie le nom complet du champ provenance
@@ -456,438 +661,545 @@ function SingleTextePublie({ history, match }) {
             return (JSON.parse(res))
         }
     }
+    const circle_air = <div className={clsx(classes.shape_air, classes.shapeCircle)} />;
+    const circle_textes_publies = <div className={clsx(classes.shape_textes_publies, classes.shapeCircle)} />;
+    const circle_editions = <div className={clsx(classes.shape_editions, classes.shapeCircle)} />;
+    const circle_references = <div className={clsx(classes.shape_references, classes.shapeCircle)} />;
+    const circle_themes = <div className={clsx(classes.shape_themes, classes.shapeCircle)} />;
 
-    const handleChange = (event, newValue) => {
-        setNeighbourNbr(newValue);
-    };
+    function getRedirected() {
+        let nodes = ['airs', 'textes_publies', 'references_externes', 'themes', 'editions']
+
+        let table = clickedData[0].split('__')[0]
+
+        switch (table) {
+            case nodes[0]:
+                history.push('/single_air/' + clickedData[0].split('__')[1])
+                break
+            case nodes[1]:
+                history.push('/single_texte_publie/' + clickedData[0].split('__')[1])
+                break
+            case nodes[2]:
+                history.push('/single_reference/' + clickedData[0].split('__')[1])
+                break
+            case nodes[3]:
+                history.push('/single_theme/' + clickedData[0].split('__')[1])
+                break
+            case nodes[4]:
+                history.push('/single_edition/' + clickedData[0].split('__')[1])
+                break
+        }
+    }
 
     return (
         <div className={classes.root} >
-
-            <Box className={classes.marginTitle}>
-                <Typography variant='h6' color='textSecondary' align='justify'  >
-                    Table des textes
+            {console.log(areAllDataUpload)}
+            {areAllDataUpload ? (
+                <>
+                    <Box className={classes.marginTitle}>
+                        <Typography variant='h6' color='textSecondary' align='justify'  >
+                            Table des textes
                     {console.log(data)}
-                </Typography>
-                <Typography color='inherit' variant='subtitle2' align='justify'>
-                    {dataTexte['id']}
-                </Typography>
-            </Box>
-            <Grid container spacing={2}
-                direction="row"
-                justify="center"
-                alignItems="justify" >
+                        </Typography>
+                        <Typography color='inherit' variant='subtitle2' align='justify'>
+                            {dataTexte['id']}
+                        </Typography>
+                    </Box>
+                    <Grid container spacing={2}
+                        direction="row"
+                        justify="center"
+                        alignItems="justify" >
 
-                <Grid item xs>{/* col 1*/}
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='h  6' color='textSecondary' align='justify'>
-                            Titre du texte
+                        <Grid item xs>{/* col 1*/}
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='h  6' color='textSecondary' align='justify'>
+                                    Titre du texte
                         </Typography>
-                        <Typography variant='h3' color='inherit' align='justify'>
-                            <i>{dataTexte['titre']}</i>
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Incipit
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['incipit'] ? dataTexte['incipit'] : 'Pas d\'incipit'}
-                        </Typography>
-                        <Typography variant='subtitle2' color='inherit' align='justify'>
-                            {dataTexte['incipit_normalise'] ? '(' + dataTexte['incipit_normalise'] + ')' : ''}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Sur l'air de
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['sur_l_air_de'] ? dataTexte['sur_l_air_de'] : 'Champ manquant    '}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Visualisation (lien web)
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['lien_web_visualisation'] ? dataTexte['lien_web_visualisation'] : 'Champ manquant'}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Auteur du texte
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['auteur'] ? dataTexte["auteur"] : 'Pas d\'auteur'}
-                        </Typography>
-                        <Typography variant='subtitle2' color='inherit' align='justify'>
-                            {dataTexte['auteur_statut_source'] === 'H' ? '( Hypothèse )' : ''}
-                            {dataTexte['auteur_statut_source'] === 'S' ? '( Présence d\'une signature  )' : ''}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Donnée entrée par
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {getSearchersNames()}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Lieu de publication de l'exemplaire « contenant »
-                        </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            Lieu indiqué : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_indique'] ? dataTexte['edition']['lieu_edition_indique'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
-                        </Typography>
-                        <Typography variant='subtitle2' color='inherit' align='justify'>
-                            Lieu réel : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_reel'] ? dataTexte['edition']['lieu_edition_reel'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Source information sur l'auteur
-                        </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['auteur_source_information'] ? dataTexte["auteur_source_information"] : 'Pas d\'indication'}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Nature texte
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['nature_texte'] ? dataTexte["nature_texte"] : ('Champ manquant')}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin} >
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Refrain
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['refrain'] && dataTexte["refrain"]}
-                            {dataTexte['refrain'] === "" && (dataTexte['refrain_normalise'] === "" && ('Champ manquant'))}
-                        </Typography>
-                        <Typography variant='subtitle2' color='inherit' align='justify'>
-                            {dataTexte['refrain_normalise'] ? '(' + dataTexte['refrain_normalise'] + ')' : ''}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Deux premiers vers (premier couplet)
-                            </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['deux_premiers_vers_premier_couplet'] && dataTexte["deux_premiers_vers_premier_couplet"]}
-                            {dataTexte['deux_premiers_vers_premier_couplet'] === "" && (dataTexte['deux_premiers_vers_premier_couplet_normalises'] === "" && ('Champ manquant'))}
-                        </Typography>
-                        <Typography variant='subtitle2' color='inherit' align='justify'>
-                            {dataTexte['deux_premiers_vers_premier_couplet_normalises'] ? '(' + dataTexte['deux_premiers_vers_premier_couplet_normalises'] + ')' : ''}
-                        </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        {getTypeIncipit()}
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='justify'>
-                            Page(s)
+                                <Typography variant='h3' color='inherit' align='justify'>
+                                    <i>{dataTexte['titre']}</i>
                                 </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataTexte['page'] ? dataTexte['page'] : 'Champ manquant'}
-                        </Typography>
-                    </Grid>
-                </Grid>
-                <Grid item xs> {/* col 2*/}
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='h4' color='textPrimary' align='center'>
-                            Forme littéraire
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Incipit
                             </Typography>
-                    </Grid>
-                    <Grid item xs className={classes.margin}>
-                        <Typography variant='body1' color='textSecondary' align='center'>
-                            Codage
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['incipit'] ? dataTexte['incipit'] : 'Pas d\'incipit'}
+                                </Typography>
+                                <Typography variant='subtitle2' color='inherit' align='justify'>
+                                    {dataTexte['incipit_normalise'] ? '(' + dataTexte['incipit_normalise'] + ')' : ''}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Sur l'air de
                             </Typography>
-                        <Typography variant='h6' color='inherit' align='center'>
-                            {dataTexte['forme_poetique'] ? dataTexte["forme_poetique"] : ('Champ manquant')}
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['sur_l_air_de'] ? dataTexte['sur_l_air_de'] : 'Champ manquant    '}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Visualisation (lien web)
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['lien_web_visualisation'] ? dataTexte['lien_web_visualisation'] : 'Champ manquant'}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Auteur du texte
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['auteur'] ? dataTexte["auteur"] : 'Pas d\'auteur'}
+                                </Typography>
+                                <Typography variant='subtitle2' color='inherit' align='justify'>
+                                    {dataTexte['auteur_statut_source'] === 'H' ? '( Hypothèse )' : ''}
+                                    {dataTexte['auteur_statut_source'] === 'S' ? '( Présence d\'une signature  )' : ''}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Donnée entrée par
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {getSearchersNames()}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Lieu de publication de l'exemplaire « contenant »
                         </Typography>
-                        <Grid item xs className={classes.margin}>
-                            {dataTexte['forme_poetique'] && (
-                                <>
-                                    <Typography variant='subtitle2' color='inherit' align='center'>
-                                        {getInformationFromFormePoetiqueCodage()[0] && ('Nombre de strophes : ' + getInformationFromFormePoetiqueCodage()[0])}
-                                    </Typography>
-                                    <Typography variant='subtitle2' color='inherit' align='center'>
-                                        {getInformationFromFormePoetiqueCodage()[1] && ('Nombre de vers par strophe : ' + getInformationFromFormePoetiqueCodage()[1])}
-                                    </Typography>
-                                    <Typography variant='subtitle2' color='inherit' align='center'>
-                                        {getInformationFromFormePoetiqueCodage()[2] && ('Nombre de syllabes par vers : ' + getInformationFromFormePoetiqueCodage()[2])}
-                                    </Typography>
-                                    <Typography variant='subtitle2' color='inherit' align='center'>
-                                        {getInformationFromFormePoetiqueCodage()[3] && ('Schéma de rime : ' + getInformationFromFormePoetiqueCodage()[3])}
-                                    </Typography>
-                                </>
-                            )}
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    Lieu indiqué : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_indique'] ? dataTexte['edition']['lieu_edition_indique'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
+                                </Typography>
+                                <Typography variant='subtitle2' color='inherit' align='justify'>
+                                    Lieu réel : {dataTexte['edition'] ? (dataTexte['edition']['lieu_edition_reel'] ? dataTexte['edition']['lieu_edition_reel'] : 'Pas d\'indication') : 'Pas d\'exemplaire'}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Source information sur l'auteur
+                        </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['auteur_source_information'] ? dataTexte["auteur_source_information"] : 'Pas d\'indication'}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Nature texte
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['nature_texte'] ? dataTexte["nature_texte"] : ('Champ manquant')}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin} >
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Refrain
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['refrain'] && dataTexte["refrain"]}
+                                    {dataTexte['refrain'] === "" && (dataTexte['refrain_normalise'] === "" && ('Champ manquant'))}
+                                </Typography>
+                                <Typography variant='subtitle2' color='inherit' align='justify'>
+                                    {dataTexte['refrain_normalise'] ? '(' + dataTexte['refrain_normalise'] + ')' : ''}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Deux premiers vers (premier couplet)
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['deux_premiers_vers_premier_couplet'] && dataTexte["deux_premiers_vers_premier_couplet"]}
+                                    {dataTexte['deux_premiers_vers_premier_couplet'] === "" && (dataTexte['deux_premiers_vers_premier_couplet_normalises'] === "" && ('Champ manquant'))}
+                                </Typography>
+                                <Typography variant='subtitle2' color='inherit' align='justify'>
+                                    {dataTexte['deux_premiers_vers_premier_couplet_normalises'] ? '(' + dataTexte['deux_premiers_vers_premier_couplet_normalises'] + ')' : ''}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                {getTypeIncipit()}
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='justify'>
+                                    Page(s)
+                                </Typography>
+                                <Typography variant='h6' color='inherit' align='justify'>
+                                    {dataTexte['page'] ? dataTexte['page'] : 'Champ manquant'}
+                                </Typography>
+                            </Grid>
+                        </Grid>
+                        <Grid item xs> {/* col 2*/}
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='h4' color='textPrimary' align='center'>
+                                    Forme littéraire
+                            </Typography>
+                            </Grid>
+                            <Grid item xs className={classes.margin}>
+                                <Typography variant='body1' color='textSecondary' align='center'>
+                                    Codage
+                            </Typography>
+                                <Typography variant='h6' color='inherit' align='center'>
+                                    {dataTexte['forme_poetique'] ? dataTexte["forme_poetique"] : ('Champ manquant')}
+                                </Typography>
+                                <Grid item xs className={classes.margin}>
+                                    {dataTexte['forme_poetique'] && (
+                                        <>
+                                            <Typography variant='subtitle2' color='inherit' align='center'>
+                                                {getInformationFromFormePoetiqueCodage()[0] && ('Nombre de strophes : ' + getInformationFromFormePoetiqueCodage()[0])}
+                                            </Typography>
+                                            <Typography variant='subtitle2' color='inherit' align='center'>
+                                                {getInformationFromFormePoetiqueCodage()[1] && ('Nombre de vers par strophe : ' + getInformationFromFormePoetiqueCodage()[1])}
+                                            </Typography>
+                                            <Typography variant='subtitle2' color='inherit' align='center'>
+                                                {getInformationFromFormePoetiqueCodage()[2] && ('Nombre de syllabes par vers : ' + getInformationFromFormePoetiqueCodage()[2])}
+                                            </Typography>
+                                            <Typography variant='subtitle2' color='inherit' align='center'>
+                                                {getInformationFromFormePoetiqueCodage()[3] && ('Schéma de rime : ' + getInformationFromFormePoetiqueCodage()[3])}
+                                            </Typography>
+                                        </>
+                                    )}
+                                </Grid>
+                            </Grid>
+                            <Grid>
+                                {/* Canvas */}
+                                <Typography variant='subtitle2' color='inherit' align='center'>
+                                    forme littéraire dessinée
+                        </Typography>
+                            </Grid>
                         </Grid>
                     </Grid>
-                    <Grid>
-                        {/* Canvas */}
-                        <Typography variant='subtitle2' color='inherit' align='center'>
-                            forme littéraire dessinée
+                    <Box pt={0} pb={5} className={classes.borderTop} />
+                    <Grid item xs className={classes.margin} >
+                        <Typography variant='body1' color='textPrimary' align='center'>
+                            Contenu du texte (retranscription)
+                        </Typography>
+                        <Typography variant='h6' color='inherit' align='center'>
+                            {data['contenu_texte'] ? data['contenu_texte'] : 'Champ manquant'}
                         </Typography>
                     </Grid>
-                </Grid>
-            </Grid>
-            <Box pt={0} pb={5} className={classes.borderTop} />
-            <Grid item xs className={classes.margin} >
-                <Typography variant='body1' color='textPrimary' align='center'>
-                    Contenu du texte (retranscription)
-                        </Typography>
-                <Typography variant='h6' color='inherit' align='center'>
-                    {data['contenu_texte'] ? data['contenu_texte'] : 'Champ manquant'}
-                </Typography>
-            </Grid>
-            <Box pt={0} pb={5} className={classes.borderBot} />
+                    <Box pt={0} pb={5} className={classes.borderBot} />
 
-            {/* Graphe local */}
-            <Box pt={10} pb={5}>
-                <Paper className={classes.paperBrown}>
-                    <Typography variant='body1' color='white' align='center'>
-                        Nombre d'objets en relation avec ce texte
+                    {/* Graphe local */}
+                    <Box pt={10} pb={5}>
+                        <Paper className={classes.paperBrown}>
+                            <Typography variant='body1' color='white' align='center'>
+                                Données en relation avec ce texte
                     </Typography>
-                    <CustomSlider
-                        defaultValue={2}
-                        aria-labelledby="discrete-slider-small-steps"
-                        step={1}
-                        marks
-                        min={1}
-                        max={4}
-                        valueLabelDisplay="auto"
-                        onChange={handleChange}
-                    />
-                </Paper>
-                <Box pb={35} />
-                {/* <Sigma
-                        graph={graphData}
-                        settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
-                        style={{
-                            height: '595px',
-                            maxWidth: 'inherit'
-                        }}
-                        onClickNode={e => {
-                            setClickedData([e.data.node.id, e.data.node.label])
-                        }
-                        }
-                    >
-                        <RandomizeNodePositions>
-                            <ForceAtlas2
-                                iterationsPerRender={1}
-                                linLogMode
-                                timeout={1000}
-                                worker
-                            />
-                            <RelativeSize initialSize={15} />
-                        </RandomizeNodePositions>
-                    </Sigma> */}
-                <Paper className={classes.paperBrown}>
-                    <Typography variant='body1' color='textPrimary' align='center'>
-                        Fiche descriptive
-                    </Typography>
-                </Paper>
-            </Box>
+                        </Paper>
+                        <Sigma
+                            graph={graphData}
+                            settings={{
+                                drawEdges: true,
+                                clone: false,
+                                minArrowSize: 2,
+                            }}
+                            style={{
+                                height: '500px',
+                                maxWidth: 'inherit',
+                            }}
+                            onClickNode={e => {
+                                setClickedData([e.data.node.id, e.data.node.label])
+                            }
+                            }
+                        >
+                            <RandomizeNodePositions>
+                                <ForceAtlas2
+                                    iterationsPerRender={1}
+                                    linLogMode
+                                    timeout={1000}
+                                    worker
+                                />
+                                {/* <RelativeSize initialSize={20} /> */}
+                            </RandomizeNodePositions>
+                        </Sigma>
+                        <Paper className={classes.paperWhite}>
+                            {clickedData.length === 0 ? (
+                                <i>Aucune donnée sélectionnée</i>
+                            ) : (
+                                    <>
+                                        <Grid container spacing={2}
+                                            direction="row"
+                                            justify="right"
+                                            alignItems="justify" >
+                                            <Grid item xs={8}>
+                                                <Box pb={2}>
+                                                    {clickedData[0].split('__')[0] === 'airs' && (<ListItem>
+                                                        <ListItemAvatar>
+                                                            <Avatar>
+                                                                {circle_air}
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary="Airs" />
+                                                    </ListItem>
+                                                    )}
+                                                    {clickedData[0].split('__')[0] === 'textes_publies' && (<ListItem>
+                                                        <ListItemAvatar>
+                                                            <Avatar>
+                                                                {circle_textes_publies}
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary="Textes publiés" />
+                                                    </ListItem>
+                                                    )}
+                                                    {clickedData[0].split('__')[0] === 'editions' && (<ListItem>
+                                                        <ListItemAvatar>
+                                                            <Avatar>
+                                                                {circle_editions}
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary="Editions" />
+                                                    </ListItem>
+                                                    )}
+                                                    {clickedData[0].split('__')[0] === 'references_externes' && (<ListItem>
+                                                        <ListItemAvatar>
+                                                            <Avatar>
+                                                                {circle_references}
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary="Références externes" />
+                                                    </ListItem>
+                                                    )}
+                                                    {clickedData[0].split('__')[0] === 'themes' && (<ListItem>
+                                                        <ListItemAvatar>
+                                                            <Avatar>
+                                                                {circle_themes}
+                                                            </Avatar>
+                                                        </ListItemAvatar>
+                                                        <ListItemText primary="Thèmes" />
+                                                    </ListItem>
+                                                    )}
+                                                </Box>
+                                                <Typography variant='subtitle2' color='textSecondary' align='left'>
+                                                    Identifiant :
+                                        </Typography>
+                                                <Typography variant='body1' color='textPrimary' align='left'>
+                                                    {clickedData[0].split('__')[1]}
+                                                </Typography>
+                                                <Box pb={2} />
+                                                <Typography variant='body1' color='textPrimary' align='left'>
+                                                    <i>{clickedData[1]}</i>
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs>
+                                                <Button variant="contained" onClick={() => getRedirected()}>Consulter</Button>
+                                            </Grid>
+                                        </Grid>
+                                    </>
+                                )}
+                        </Paper>
+                    </Box>
 
-            <Box pt={0} pb={10} className={classes.tablesRelation}>
-                <Typography variant='h6' color='inherit' align='justify'>
-                    Données liées :
+                    <Box pt={0} pb={10} className={classes.tablesRelation}>
+                        <Typography variant='h6' color='inherit' align='justify'>
+                            Données liées :
                 </Typography>
-                <List
-                    component="nav"
-                    aria-labelledby="nested-list-subheader"
-                    subheader={
-                        <ListSubheader component="div" id="nested-list-subheader">
-                            Nom des tables en relation avec ce texte
+                        <List
+                            component="nav"
+                            aria-labelledby="nested-list-subheader"
+                            subheader={
+                                <ListSubheader component="div" id="nested-list-subheader">
+                                    Nom des tables en relation avec ce texte
                         </ListSubheader>
-                    }
-                >
-                    <ListItem
-                        button
-                        onClick={handleClickAirs}
-                        selected={false}
-                    >
-                        <ListItemIcon>
-                            <Icon class="fas fa-music" />
-                        </ListItemIcon>
-                        <ListItemText primary="Airs « supports » " />
-                        {openAirs ? <ExpandMore /> : <ExpandLess />}
-                    </ListItem>
-                    <Collapse in={openAirs} timeout="auto" unmountOnExit>
-                        {dataTimbres['airs'] ? (
-                            <MaterialTable
-                                localization={{
-                                    body: {
-                                        emptyDataSourceMessage:
-                                            <div className={classes.root}>
-                                                <FacebookCircularProgress classes={{
-                                                    circle: classes.circle,
-                                                }} />
-                                            </div>
-                                    }
-                                }}
-                                icons={tableIcons}
-                                columns={[
-                                    { title: 'UUID', field: 'id' },
-                                    { title: 'Sources musicales', field: 'sources_musicales' },
-                                    { title: 'Nom air', field: 'air_normalise' },
-                                    { title: 'Surnom', field: 'surnom_1' },
-                                ]}
-                                data={[dataTimbres['airs']]}
-                                title={[dataTimbres['airs']] ? ("Air(s) correspondant(s) - " + [dataTimbres['airs']].length + " résultat") : ('Airs')}
-                                onRowClick={((evt, selectedRow) => {
-                                    if (evt.target.nodeName === 'TD') {
-                                        const selected_id = selectedRow['id']
-                                        console.log(selected_id)
-                                        history.push('/single_air/' + selected_id)
-                                    }
-                                })}
-                                options={{
-                                    rowStyle: rowData => ({
-                                        filtering: true,
-                                    }),
-                                    headerStyle: {
-                                        backgroundColor: '#AC8E7A',
-                                        color: '#FFF'
-                                    },
-                                    filtering: true,
-                                }}
-                            />
-                        ) : (
-                                <Typography variant='h6' color='inherit' align='center'>
-                                    Aucun air
-                                </Typography>
-                            )}
-                    </Collapse>
-                    <ListItem
-                        button
-                        onClick={handleClickEx}
-                        selected={false}
-                    >
-                        <ListItemIcon>
-                            <Icon class="fas fa-book" />
-                        </ListItemIcon>
-                        <ListItemText primary="Editions « contenantes »" />
-                        {openExemplaires ? <ExpandMore /> : <ExpandLess />}
-                    </ListItem>
-                    <Collapse in={openExemplaires} timeout="auto" unmountOnExit>
-                        {[dataTexte['edition']] ? (
-                            <MaterialTable
-                                localization={{
-                                    body: {
-                                        emptyDataSourceMessage:
-                                            <div className={classes.root}>
-                                                <FacebookCircularProgress classes={{
-                                                    circle: classes.circle,
-                                                }} />
-                                            </div>
-                                    }
-                                }}
-                                icons={tableIcons}
-                                columns={[
-                                    { title: 'UUID', field: 'id' },
-                                    { title: 'Titre', field: 'titre_ouvrage' },
-                                    { title: 'Auteur', field: 'auteur' },
-                                    { title: 'Conservation', field: 'ville_conservation' },
-                                    { title: 'Lieu de dépôt', field: 'depot_conservation' },
-                                    { title: 'Année indiquée', field: 'annee_indiquee' },
-                                    { title: 'Année estimée', field: 'annee_estimee' },
-                                    { title: 'Format', field: 'format' },
-                                ]}
-                                data={[dataTexte['edition']]}
-                                title={[dataTexte['edition']] ? ("Exemplaire correspondant - " + [dataTexte['edition']].length + " résultat") : ('Exemplaire')}
-                                onRowClick={((evt, selectedRow) => {
-                                    if (evt.target.nodeName === 'TD') {
-                                        const selected_id = selectedRow['id']
-                                        console.log(selected_id)
-                                        history.push('/single_edition/' + selected_id)
-                                    }
-                                })}
-                                options={{
-                                    rowStyle: rowData => ({
-                                        filtering: true,
-                                    }),
-                                    headerStyle: {
-                                        backgroundColor: '#AC8E7A',
-                                        color: '#FFF'
-                                    },
-                                    filtering: true,
-                                }}
-                            />
-                        ) : (
-                                <Typography variant='h6' color='inherit' align='center'>
-                                    Aucun exemplaire
-                                </Typography>
-                            )}
-                    </Collapse>
-                    <ListItem
-                        button
-                        onClick={handleClickRef}
-                        selected={false}
-                    >
-                        <ListItemIcon>
-                            <Icon class="fas fa-book-open" />
-                        </ListItemIcon>
-                        <ListItemText primary="Références" />
-                        {openReference ? <ExpandMore /> : <ExpandLess />}
-                    </ListItem>
-                    <Collapse in={openReference} timeout="auto" unmountOnExit>
-                        {dataTexte['references_externes'] && (dataTexte['references_externes'].length !== 0 ? (
-                            <MaterialTable
-                                localization={{
-                                    body: {
-                                        emptyDataSourceMessage:
-                                            <div className={classes.root}>
-                                                <FacebookCircularProgress classes={{
-                                                    circle: classes.circle,
-                                                }} />
-                                            </div>
-                                    }
-                                }}
-                                icons={tableIcons}
-                                columns={[
-                                    { title: 'UUID', field: 'id' },
-                                    { title: 'Titre', field: 'titre' },
-                                    { title: 'Nom auteur', field: 'auteur' },
-                                    { title: 'Nom Editeur', field: 'editeur' },
-                                    { title: 'Lien web', field: 'lien' },
-                                    { title: 'Description référence', field: 'description_reference' }
-                                ]}
-                                data={getReference()}
-                                title={getReference() ? ("Références correspondantes - " + getReference().length + " résultats") : ('Références')}
-                                onRowClick={((evt, selectedRow) => {
-                                    if (evt.target.nodeName === 'TD') {
-                                        const selected_id = selectedRow['id']
-                                        console.log(selected_id)
-                                        history.push('/single_reference/' + selected_id)
-                                    }
-                                })}
-                                options={{
-                                    rowStyle: rowData => ({
-                                        filtering: true,
-                                    }),
-                                    headerStyle: {
-                                        backgroundColor: '#AC8E7A',
-                                        color: '#FFF'
-                                    },
-                                    filtering: true,
-                                }}
+                            }
+                        >
+                            <ListItem
+                                button
+                                onClick={handleClickAirs}
+                                selected={false}
+                            >
+                                <ListItemIcon>
+                                    <Icon class="fas fa-music" />
+                                </ListItemIcon>
+                                <ListItemText primary="Airs « supports » " />
+                                {openAirs ? <ExpandMore /> : <ExpandLess />}
+                            </ListItem>
+                            <Collapse in={openAirs} timeout="auto" unmountOnExit>
+                                {dataTimbres['airs'] ? (
+                                    <MaterialTable
+                                        localization={{
+                                            body: {
+                                                emptyDataSourceMessage:
+                                                    <div className={classes.root}>
+                                                        <FacebookCircularProgress classes={{
+                                                            circle: classes.circle,
+                                                        }} />
+                                                    </div>
+                                            }
+                                        }}
+                                        icons={tableIcons}
+                                        columns={[
+                                            { title: 'UUID', field: 'id' },
+                                            { title: 'Sources musicales', field: 'sources_musicales' },
+                                            { title: 'Nom air', field: 'air_normalise' },
+                                            { title: 'Surnom', field: 'surnom_1' },
+                                        ]}
+                                        data={[dataTimbres['airs']]}
+                                        title={[dataTimbres['airs']] ? ("Air(s) correspondant(s) - " + [dataTimbres['airs']].length + " résultat") : ('Airs')}
+                                        onRowClick={((evt, selectedRow) => {
+                                            if (evt.target.nodeName === 'TD') {
+                                                const selected_id = selectedRow['id']
+                                                console.log(selected_id)
+                                                history.push('/single_air/' + selected_id)
+                                            }
+                                        })}
+                                        options={{
+                                            rowStyle: rowData => ({
+                                                filtering: true,
+                                            }),
+                                            headerStyle: {
+                                                backgroundColor: '#AC8E7A',
+                                                color: '#FFF'
+                                            },
+                                            filtering: true,
+                                        }}
+                                    />
+                                ) : (
+                                        <Typography variant='h6' color='inherit' align='center'>
+                                            Aucun air
+                                        </Typography>
+                                    )}
+                            </Collapse>
+                            <ListItem
+                                button
+                                onClick={handleClickEx}
+                                selected={false}
+                            >
+                                <ListItemIcon>
+                                    <Icon class="fas fa-book" />
+                                </ListItemIcon>
+                                <ListItemText primary="Editions « contenantes »" />
+                                {openExemplaires ? <ExpandMore /> : <ExpandLess />}
+                            </ListItem>
+                            <Collapse in={openExemplaires} timeout="auto" unmountOnExit>
+                                {[dataTexte['edition']] ? (
+                                    <MaterialTable
+                                        localization={{
+                                            body: {
+                                                emptyDataSourceMessage:
+                                                    <div className={classes.root}>
+                                                        <FacebookCircularProgress classes={{
+                                                            circle: classes.circle,
+                                                        }} />
+                                                    </div>
+                                            }
+                                        }}
+                                        icons={tableIcons}
+                                        columns={[
+                                            { title: 'UUID', field: 'id' },
+                                            { title: 'Titre', field: 'titre_ouvrage' },
+                                            { title: 'Auteur', field: 'auteur' },
+                                            { title: 'Conservation', field: 'ville_conservation' },
+                                            { title: 'Lieu de dépôt', field: 'depot_conservation' },
+                                            { title: 'Année indiquée', field: 'annee_indiquee' },
+                                            { title: 'Année estimée', field: 'annee_estimee' },
+                                            { title: 'Format', field: 'format' },
+                                        ]}
+                                        data={[dataTexte['edition']]}
+                                        title={[dataTexte['edition']] ? ("Exemplaire correspondant - " + [dataTexte['edition']].length + " résultat") : ('Exemplaire')}
+                                        onRowClick={((evt, selectedRow) => {
+                                            if (evt.target.nodeName === 'TD') {
+                                                const selected_id = selectedRow['id']
+                                                console.log(selected_id)
+                                                history.push('/single_edition/' + selected_id)
+                                            }
+                                        })}
+                                        options={{
+                                            rowStyle: rowData => ({
+                                                filtering: true,
+                                            }),
+                                            headerStyle: {
+                                                backgroundColor: '#AC8E7A',
+                                                color: '#FFF'
+                                            },
+                                            filtering: true,
+                                        }}
+                                    />
+                                ) : (
+                                        <Typography variant='h6' color='inherit' align='center'>
+                                            Aucun exemplaire
+                                        </Typography>
+                                    )}
+                            </Collapse>
+                            <ListItem
+                                button
+                                onClick={handleClickRef}
+                                selected={false}
+                            >
+                                <ListItemIcon>
+                                    <Icon class="fas fa-book-open" />
+                                </ListItemIcon>
+                                <ListItemText primary="Références" />
+                                {openReference ? <ExpandMore /> : <ExpandLess />}
+                            </ListItem>
+                            <Collapse in={openReference} timeout="auto" unmountOnExit>
+                                {dataTexte['references_externes'] && (dataTexte['references_externes'].length !== 0 ? (
+                                    <MaterialTable
+                                        localization={{
+                                            body: {
+                                                emptyDataSourceMessage:
+                                                    <div className={classes.root}>
+                                                        <FacebookCircularProgress classes={{
+                                                            circle: classes.circle,
+                                                        }} />
+                                                    </div>
+                                            }
+                                        }}
+                                        icons={tableIcons}
+                                        columns={[
+                                            { title: 'UUID', field: 'id' },
+                                            { title: 'Titre', field: 'titre' },
+                                            { title: 'Nom auteur', field: 'auteur' },
+                                            { title: 'Nom Editeur', field: 'editeur' },
+                                            { title: 'Lien web', field: 'lien' },
+                                            { title: 'Description référence', field: 'description_reference' }
+                                        ]}
+                                        data={getReference()}
+                                        title={getReference() ? ("Références correspondantes - " + getReference().length + " résultats") : ('Références')}
+                                        onRowClick={((evt, selectedRow) => {
+                                            if (evt.target.nodeName === 'TD') {
+                                                const selected_id = selectedRow['id']
+                                                console.log(selected_id)
+                                                history.push('/single_reference/' + selected_id)
+                                            }
+                                        })}
+                                        options={{
+                                            rowStyle: rowData => ({
+                                                filtering: true,
+                                            }),
+                                            headerStyle: {
+                                                backgroundColor: '#AC8E7A',
+                                                color: '#FFF'
+                                            },
+                                            filtering: true,
+                                        }}
 
-                            />
-                        ) : (
-                                <Typography variant='h6' color='inherit' align='center'>
-                                    Aucune référence
-                                </Typography>
-                            ))}
-                    </Collapse>
-                </List>
-            </Box>
+                                    />
+                                ) : (
+                                        <Typography variant='h6' color='inherit' align='center'>
+                                            Aucune référence
+                                        </Typography>
+                                    ))}
+                            </Collapse>
+                        </List>
+                    </Box>
+                </>
+            ) : (
+                    <Box
+                        display="flex"
+                        width='100%'
+                        height='100%'
+                        bgcolor="white"
+                        alignItems="center"
+                        justifyContent="center"
+                        pt={40}
+                        pb={40}
+                    >
+                        <FacebookCircularProgress classes={{
+                            circle: classes.circle,
+                        }} />
+                    </Box>
+                )}
         </div >
     )
 }
