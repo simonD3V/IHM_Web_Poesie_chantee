@@ -285,8 +285,8 @@ function SingleAir({ history, match }) {
                         <Typography variant='body1' color='textSecondary' align='justify'>
                             Sources musicales
                         </Typography>
-                        <Typography variant='h6' color='inherit' align='justify'>
-                            {dataAir['sources_musicales']}
+                        <Typography variant='subtitle2' color='inherit' align='justify'>
+                            <i>{dataAir['sources_musicales']}</i>
                         </Typography>
                     </Grid>
                 </Grid>
@@ -320,8 +320,7 @@ function SingleAir({ history, match }) {
                         {openTextes ? <ExpandMore /> : <ExpandLess />}
                     </ListItem>
                     <Collapse in={openTextes} timeout="auto" unmountOnExit>
-
-                        {dataTextes ? (
+                        {dataTextes && (dataTextes.length!==0 ? (
                             <MaterialTable
                                 localization={{
                                     body: {
@@ -369,7 +368,7 @@ function SingleAir({ history, match }) {
                                 <Typography variant='h6' color='inherit' align='center'>
                                     Aucun texte
                                 </Typography>
-                            )}
+                            ))}
                     </Collapse>
                 </List>
             </Box>
