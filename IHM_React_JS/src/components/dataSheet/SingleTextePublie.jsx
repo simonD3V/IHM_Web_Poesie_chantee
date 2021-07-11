@@ -595,13 +595,19 @@ function SingleTextePublie({ history, match }) {
         versNumber = code[1]
 
         let syllabeNumberStr = ''
-        for (let c = 0; c < code[2].length; c++) {
-            if (isNumber(code[2][c])) {
-                syllabeNumberStr += code[2][c]
+
+        if (code[2]) {
+            for (let c = 0; c < code[2].length; c++) {
+                if (isNumber(code[2][c])) {
+                    syllabeNumberStr += code[2][c]
+                }
+                else {
+                    schemaRimes += code[2][c]
+                }
             }
-            else {
-                schemaRimes += code[2][c]
-            }
+        }
+        else {
+            return ['Inconnu', 'Inconnu', 'Inconnu', 'Inconnu']
         }
         syllabeNumber = parseInt(syllabeNumberStr)
         switch (syllabeNumber) {
@@ -899,32 +905,32 @@ function SingleTextePublie({ history, match }) {
                                 Données en relation avec ce texte
                     </Typography>
                         </Paper>
-                            <Sigma key={id}
-                                graph={graphData}
-                                settings={{
-                                    drawEdges: true,
-                                    clone: false,
-                                    minArrowSize: 2,
-                                }}
-                                style={{
-                                    height: '500px',
-                                    maxWidth: 'inherit',
-                                }}
-                                onClickNode={e => {
-                                    setClickedData([e.data.node.id, e.data.node.label])
-                                }
-                                }
-                            >
-                                <RandomizeNodePositions>
-                                    <ForceAtlas2
-                                        iterationsPerRender={1}
-                                        linLogMode
-                                        timeout={1000}
-                                        worker
-                                    />
-                                    {/* <RelativeSize initialSize={20} /> */}
-                                </RandomizeNodePositions>
-                            </Sigma>
+                        <Sigma key={id}
+                            graph={graphData}
+                            settings={{
+                                drawEdges: true,
+                                clone: false,
+                                minArrowSize: 2,
+                            }}
+                            style={{
+                                height: '500px',
+                                maxWidth: 'inherit',
+                            }}
+                            onClickNode={e => {
+                                setClickedData([e.data.node.id, e.data.node.label])
+                            }
+                            }
+                        >
+                            <RandomizeNodePositions>
+                                <ForceAtlas2
+                                    iterationsPerRender={1}
+                                    linLogMode
+                                    timeout={1000}
+                                    worker
+                                />
+                                {/* <RelativeSize initialSize={20} /> */}
+                            </RandomizeNodePositions>
+                        </Sigma>
                         <Paper className={classes.paperWhite}>
                             {clickedData.length === 0 ? (
                                 <i>Aucune donnée sélectionnée</i>
