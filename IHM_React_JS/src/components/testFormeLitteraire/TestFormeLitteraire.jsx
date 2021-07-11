@@ -1000,7 +1000,7 @@ function TestFormeLitteraire() {
                                                         alignItems="center" >
                                                         <Grid item xs={7}>
                                                             <Typography variant='subtitle2' style={{ color: 'white' }} align='justify'>
-                                                                Titre : {titre}
+                                                                Titre : {titre === "" ? ('Champ manquant'): titre}
                                                             </Typography>
                                                             <Typography variant='h6' style={{ color: 'white' }} align='justify'>
                                                                 {forme_poetique}
@@ -1025,7 +1025,7 @@ function TestFormeLitteraire() {
                                                             </Grid>
                                                             <Grid item xs={7}>
                                                                 <Typography variant='subtitle2' style={{ color: 'white' }} align='justify'>
-                                                                    Titre : {titre}
+                                                                    Titre : {titre === "" ? ('Champ manquant'): titre}
                                                                 </Typography>
                                                                 <Typography variant='h6' style={{ color: 'white' }} align='justify'>
                                                                     {forme_poetique}
