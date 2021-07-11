@@ -194,7 +194,7 @@ function Airs() {
                             { title: 'Sources musicales', field: 'sources_musicales' },
                             { title: 'Nom air', field: 'air_normalise' },
                             { title: 'Surnom', field: 'surnom_1' },
-                            { title: 'UUID Textes liés', field: 'textes_publies', render: rowData => getTheTextUUID(rowData) }
+                            { title: 'Titre des textes liés', field: 'textes_publies', render: rowData => getTheTextUUID(rowData) }
                         ]}
                         data={dataAirs()}
                         title={dataAirs() ? ("Airs - " + dataAirs().length + " résultats") : ('Airs')}

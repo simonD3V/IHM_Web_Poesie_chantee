@@ -144,7 +144,7 @@ function Home() {
             title="« Joueur de luth » par Caravaggio"
           />
           <Typography className={classes.font} gutterBottom variant="h1" component="h2">
-            Projet Timbres
+            <i>Sur l'air de ...</i>
           </Typography>
           <Typography className={classes.legend} variant="body2" color="textSecondary" component="p">
             “Joueur de luth,” huile sur toile par Caravaggio 1595-1596, The new Hermitage, Russie.

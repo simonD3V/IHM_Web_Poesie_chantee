@@ -1,10 +1,17 @@
 import Typography from '@material-ui/core/Typography';
-import { useState } from 'react';
+import React, { useState, useEffect, Fragment } from 'react'
 import Canvas from './Canvas'
-import { Box, Button, FormControl, Grid, makeStyles, Paper, TextField, withStyles } from '@material-ui/core';
-import { withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom'
+import { Box, Grid, IconButton, ListSubheader, makeStyles, Paper, Button, FormControl, TextField, withStyles } from '@material-ui/core'
+import AnnouncementIcon from '@material-ui/icons/Announcement';
+import PropTypes from 'prop-types';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
 
-const useStyles = makeStyles({
+
+const useStyles = makeStyles((theme) => ({
     title: {
         width: 500,
         margin: 'auto',
@@ -12,6 +19,33 @@ const useStyles = makeStyles({
         alignItems: 'center',
         justifyContent: 'center',
         spacing: 10,
+    },
+    liste: {
+        width: 500,
+        textAlign: 'center',
+        margin: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        spacing: 10,
+    },
+    card: {
+        width: 800
+    },
+    paperResultGreen: {
+        maxWidth: '100%',
+        height: '50%',
+        margin: `${theme.spacing(1)}px auto`,
+        padding: theme.spacing(2),
+        textAlign: 'justify',
+        backgroundColor: '#BDE4A0',
+    },
+    paperResultRed: {
+        maxWidth: '100%',
+        height: '50%',
+        margin: `${theme.spacing(1)}px auto`,
+        padding: theme.spacing(2),
+        textAlign: 'justify',
+        backgroundColor: '#F04D4D',
     },
     description: {
         width: 500,
@@ -60,7 +94,7 @@ const useStyles = makeStyles({
     formControlText: {
         minWidth: 400,
     }
-});
+}));
 
 const CssTextField = withStyles({
     root: {
@@ -97,8 +131,41 @@ const ColorButton = withStyles((theme) => ({
 function TestFormeLitteraire() {
 
     const classes = useStyles();
-    
-    // Code
+
+    // Liste de textes et de leur forme poétique
+
+    const [textes, setTextes] = useState([])
+
+    const query = `{
+        textes_publies(
+            filter: {forme_poetique: { _nin:"" }}
+          )
+          {
+            titre
+            id
+            auteur
+            forme_poetique
+          }
+      }`
+
+    useEffect(() => {
+        (async () => {
+            let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    query
+                })
+            })
+            let j = await d.json()
+            setTextes(j)
+        })()
+    }, [query])
+
+    // Code forme littéraire
 
     const [codeString, setCodeString] = useState('')
     const handleChangeCodeString = (event) => {
@@ -145,6 +212,11 @@ function TestFormeLitteraire() {
     let data = []
 
     const lettres_autorisée = ['a', 'b', 'c', 'd', 'e', 'g', 'h', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'G', 'H', 'X', 'Y', 'Z', 'm', 'M', 'f', 'F']
+    const nbrVersMax = 11
+    const nbrStropheMax = 100
+    function isLetter(c) {
+        return c.toLowerCase() != c.toUpperCase();
+    }
 
     function isItCorrect() {
 
@@ -444,6 +516,209 @@ function TestFormeLitteraire() {
         }
     }
 
+    function isTheCodeCorrect_list(code_str) {
+
+        if (code_str.indexOf('|') > -1) {
+            // il y a une '|' -> mention d'un refrain avant
+            // déterminer où est le début du refrain et le début du couplet 
+
+            let debutCouplet = 0
+
+            var char = code_str[0]
+
+            while (char !== '|') {
+                debutCouplet += 1
+                char = code_str[debutCouplet]
+            }
+            debutCouplet += 1
+
+            // code avec refrain et couplet
+
+            // let nombreLettres = 0
+            let tmpStructureRimes = ''
+            let erreurs = 0
+            let messages_erreurs = []
+
+            for (var m = 0; m < debutCouplet - 1; m++) {
+
+                if (parseInt(code_str[m]) !== 'NaN' && parseInt(code_str[m]) < 10) {
+
+                    // Il s'agit de l'indication d'un metre
+                    let tmpMetre = code_str[m]
+
+                    if (parseInt(code_str[m + 1]) !== 'NaN' && parseInt(code_str[m + 1]) < 10) {
+                        // pour les vers dont le metre dépasserait 2 digits
+                        m += 1
+                        tmpMetre += code_str[m]
+                        if (parseInt(tmpMetre) > 15) {
+                            messages_erreurs.push('Nombre de syllabes trop important')
+                            erreurs += 1
+                        }
+                    }
+                    tmpStructureRimes += tmpMetre
+                }
+                else {
+
+                    // Il s'agit de l'indication d'une rime (et potentiellement de son genre)
+                    let tmpLettre = code_str[m]
+
+                    // lettre bissée 
+                    if (tmpLettre === '[') {
+
+                        if (code_str[m + 1] === code_str[m - 1]) {
+                            if (code_str[m + 2] === ']') {
+                                // on avance de deux 
+                                tmpStructureRimes += '[' + code_str[m + 1] + ']'
+                                m += 2
+                            }
+                            else {
+                                messages_erreurs.push('Un crochet a été mal fermé')
+                                erreurs += 1
+                            }
+                        }
+                        else {
+                            messages_erreurs.push('Le bis doit s\'effectuer sur la dernière lettre')
+                            erreurs += 1
+                        }
+                    }
+                    else {
+                        for (var l = 0; l < lettres_autorisée.length; l++) {
+                            if (tmpLettre === lettres_autorisée[l]) {
+                                // nombreLettres += 1
+                                tmpStructureRimes += tmpLettre
+                            }
+                        }
+                        if ((lettres_autorisée.includes(tmpLettre)) === false) {
+                            messages_erreurs.push('Présence d\'une lettre incorrecte')
+                            erreurs += 1
+                        }
+                    }
+                }
+            }
+            if (erreurs !== 0) {
+                return (['Structure incorrecte', messages_erreurs, false])
+            }
+            else {
+                return (['Structure correcte', messages_erreurs, true])
+            }
+        }
+        else {
+            // il n'y a pas de '|'
+            // on commence par le codage classique
+
+            // code d'un couplet seulement 
+
+            // on efface le refrain
+
+            // Nombre de strophe
+            let erreurs = 0
+            let messages_erreurs = []
+            let i = 0
+            let k = 0
+            let j = 0
+
+            let tmpNbrStrophe = ''
+            while (i < 2 && code_str[i] !== '*') {
+                tmpNbrStrophe += code_str[i]
+                i += 1
+            }
+            if (parseInt(tmpNbrStrophe) !== 'NaN' && parseInt(tmpNbrStrophe) < nbrStropheMax && parseInt(tmpNbrStrophe) > 0 && code_str[i] === '*') {
+
+                // Nombre de vers
+                j = i + 1
+                let tmpNbrVers = ''
+                while (j < i + 3 && code_str[j] !== '*') {
+                    tmpNbrVers += code_str[j]
+                    j += 1
+                }
+                if (parseInt(tmpNbrVers) !== 'NaN' && parseInt(tmpNbrVers) < nbrVersMax && parseInt(tmpNbrVers) > 0 && code_str[j] === '*') {
+
+                    // Nombre de syllabes par rime et structure de rimes
+                    let nombreLettres = 0
+                    let tmpStructureRimes = ''
+                    for (k = j + 1; k < code_str.length; k++) {
+                        let tmpLettre = code_str[k]
+                        let tmpMetre = code_str[k]
+
+                        if (parseInt(code_str[k]) !== 'NaN' && parseInt(code_str[k]) < 10) {
+
+                            // Il s'agit de l'indication d'un metre
+
+                            if (parseInt(code_str[k + 1]) !== 'NaN' && parseInt(code_str[k + 1]) < 10) {
+                                // pour les vers dont le metre dépasserait 2 digits
+                                k += 1
+                                tmpMetre += code_str[k]
+                                if (parseInt(tmpMetre) > 15) {
+                                    messages_erreurs.push('Nombre de syllabes trop important')
+                                    erreurs += 1
+                                }
+                            }
+                            tmpStructureRimes += tmpMetre
+                        }
+                        else {
+
+                            // Il s'agit de l'indication d'une rime (et potentiellement de son genre)                          
+
+                            // lettre bissée 
+                            if (tmpLettre === '[') {
+
+                                if (code_str[k + 1] === code_str[k - 1]) {
+                                    if (code_str[k + 2] === ']') {
+                                        // on avance de deux
+                                        tmpStructureRimes += '[' + code_str[k + 1] + ']'
+                                        k += 2
+                                    }
+                                    else {
+                                        messages_erreurs.push('Fermer les crochets')
+                                        erreurs += 1
+                                    }
+                                }
+                                else {
+                                    messages_erreurs.push('Le bis doit s\'effectuer sur la dernière lettre')
+                                    erreurs += 1
+                                }
+                            }
+                            else {
+                                for (l = 0; l < lettres_autorisée.length; l++) {
+                                    if (tmpLettre === lettres_autorisée[l]) {
+                                        nombreLettres += 1
+                                        tmpStructureRimes += tmpLettre
+                                    }
+                                }
+                            }
+                        }
+                        if (isLetter(tmpLettre)) {
+                            if (lettres_autorisée.includes(tmpLettre) === false) {
+                                messages_erreurs.push('Présence d\'une lettre incorrecte')
+                                erreurs += 1
+                            }
+                        }
+
+                    }
+
+                    if (nombreLettres !== parseInt(tmpNbrVers) && erreurs === 0) {
+                        messages_erreurs.push('Veuillez choisir le même nombre de lettres que de vers indiqués')
+                        erreurs += 1
+                    }
+                }
+                else {
+                    messages_erreurs.push('Choisissez un nombre de vers entre 1 et 10')
+                    erreurs += 1
+                }
+            }
+            else {
+                messages_erreurs.push('Choisissez un nombre de strophe entre 1 et 99')
+                erreurs += 1
+            }
+            if (erreurs !== 0) {
+                return (['Structure incorrecte', messages_erreurs, false])
+            }
+            else {
+                return (['Structure correcte', messages_erreurs, true])
+            }
+        }
+    }
+
     function genererJSON() {
         let jsonString = '{'
 
@@ -566,6 +841,55 @@ function TestFormeLitteraire() {
         console.log(data)
     }
 
+    // Affichage des erreurs
+
+    const [open, setOpen] = useState(false);
+    const [selectedValue, setSelectedValue] = useState([]);
+
+    const displayErrors = (list_errors) => {
+        setOpen(true);
+        setSelectedValue(list_errors[1])
+    };
+
+    const handleCloseErrors = (value) => {
+        setOpen(false);
+    };
+
+    function SimpleDialog(props) {
+        const { onClose, selectedValue, open } = props;
+
+        const handleClose = () => {
+            onClose(selectedValue);
+        };
+
+        return (
+            <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
+                <DialogTitle id="simple-dialog-title">Liste d'erreurs</DialogTitle>
+                <List>
+                    <ListItem>
+                        <Typography variant='subtitle2' style={{ color: 'red' }} align='justify'>
+                            Nombre d'erreurs : {selectedValue.length}
+                        </Typography>
+                    </ListItem>
+                    {selectedValue.map((erreur) => (
+                        <ListItem key={erreur}>
+                            <Typography variant='subtitle1' style={{ color: 'black' }} align='justify'>
+                                {erreur}
+                            </Typography>
+                        </ListItem>
+                    ))}
+                </List>
+            </Dialog>
+        );
+    }
+
+    SimpleDialog.propTypes = {
+        onClose: PropTypes.func.isRequired,
+        open: PropTypes.bool.isRequired,
+        selectedValue: PropTypes.string.isRequired,
+    };
+
+
     return (
         <>
             <Grid
@@ -601,7 +925,7 @@ function TestFormeLitteraire() {
 
                     <Box className={classes.codage} pt={5}>
                         <Typography variant='body1' align='center' className={classes.descriptionTitle} >
-                            Entrez une forme littéraire codée
+                            Veuillez entrer une forme littéraire codée
                             </Typography>
                         <FormControl className={classes.formControlText}>
                             <CssTextField
@@ -628,14 +952,14 @@ function TestFormeLitteraire() {
                     <Box pt={10} className={classes.description} >
                         <Typography variant='h6'>
 
-                                {console.log('Couplet : ' + couplet.stropheNumber + ' ' + couplet.versNumber + ' ' + couplet.structureRimes)}
-                                {console.log('Refrain : ' + refrain.structureRimes)}
+                            {console.log('Couplet : ' + couplet.stropheNumber + ' ' + couplet.versNumber + ' ' + couplet.structureRimes)}
+                            {console.log('Refrain : ' + refrain.structureRimes)}
 
-                                {couplet.stropheNumber !== '' && (couplet.versNumber !== '' && (couplet.structureRimes !== '' &&
-                                    (
-                                        'Code correct'
-                                    )))
-                                }
+                            {couplet.stropheNumber !== '' && (couplet.versNumber !== '' && (couplet.structureRimes !== '' &&
+                                (
+                                    'Code correct'
+                                )))
+                            }
 
                             {couplet.stropheNumber !== '' && (couplet.versNumber !== '' && (couplet.structureRimes !== '' && (genererJSON())))}
 
@@ -649,6 +973,83 @@ function TestFormeLitteraire() {
                     </Box>
                 </Grid>
             </Grid>
+            <Grid
+                container
+                direction="row"
+                justify="center"
+                alignItems="center"
+                spacing={5}
+            >
+                <Grid item xs={5}>
+                    <Box className={classes.liste} pb={5} pt={5}>
+                        <Typography variant='h4'>
+                            Liste des formes poétiques
+                        </Typography>
+
+                        {textes.length !== 0 && (
+                            <Fragment>
+                                <Box className={classes.card} pt={0} pb={5}>
+                                    {textes['data']['textes_publies'].map(({ id, titre, forme_poetique }, index) => (
+                                        <div key={index}>
+
+                                            {isTheCodeCorrect_list(forme_poetique)[2] ? (
+                                                <Paper elevation={3} className={classes.paperResultGreen} >
+                                                    <Grid container spacing={2}
+                                                        direction="row"
+                                                        justify="center"
+                                                        alignItems="center" >
+                                                        <Grid item xs={7}>
+                                                            <Typography variant='subtitle2' style={{ color: 'white' }} align='justify'>
+                                                                Titre : {titre}
+                                                            </Typography>
+                                                            <Typography variant='h6' style={{ color: 'white' }} align='justify'>
+                                                                {forme_poetique}
+                                                            </Typography>
+                                                        </Grid>
+                                                        <Grid item xs>
+                                                            <Typography variant='subtitle2' color='textSecondary' align='right'>
+                                                                {id}
+                                                            </Typography>
+                                                        </Grid>
+                                                    </Grid>
+                                                </Paper>) : (
+                                                    <Paper elevation={3} className={classes.paperResultRed} >
+                                                        <Grid container spacing={2}
+                                                            direction="row"
+                                                            justify="center"
+                                                            alignItems="center" >
+                                                            <Grid item xs={1}>
+                                                                <IconButton onClick={() => displayErrors(isTheCodeCorrect_list(forme_poetique))}>
+                                                                    <AnnouncementIcon fontSize="large" />
+                                                                </IconButton>
+                                                            </Grid>
+                                                            <Grid item xs={7}>
+                                                                <Typography variant='subtitle2' style={{ color: 'white' }} align='justify'>
+                                                                    Titre : {titre}
+                                                                </Typography>
+                                                                <Typography variant='h6' style={{ color: 'white' }} align='justify'>
+                                                                    {forme_poetique}
+                                                                </Typography>
+                                                            </Grid>
+                                                            <Grid item xs>
+                                                                <Typography variant='subtitle2' color='textSecondary' align='right'>
+                                                                    {id}
+                                                                </Typography>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </Paper>
+                                                )}
+                                        </div>
+                                    ))}
+                                    <SimpleDialog selectedValue={selectedValue} open={open} onClose={handleCloseErrors} />
+                                </Box>
+                            </Fragment>
+                        )}
+                    </Box>
+                </Grid>
+
+            </Grid>
+
         </>
     );
 }

@@ -203,6 +203,8 @@ function SingleTextePublie({ history, match }) {
 
     const [dataTexte, setDataTexte] = useState([])      // contient les informations du texte sélectionné
     const [dataTimbres, setDataTimbres] = useState([])  // contient des timbres liés au texte sélectionné
+    const [dataAirs, setDataAirs] = useState([])        // contient les airs liés au texte
+
     const [areAllDataUpload, setAreAllDataUpload] = useState(false)
     const [graphData, setGraphData] = useState([])
     const [clickedData, setClickedData] = useState([])
@@ -464,9 +466,9 @@ function SingleTextePublie({ history, match }) {
         }
     }`
 
-
     useEffect(() => {
         (async () => {
+            console.log(id)
             let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {
                 method: 'POST',
                 headers: {
@@ -492,13 +494,20 @@ function SingleTextePublie({ history, match }) {
             setData(j)
             transformData(j)
             setGraphData(LocalGraph(j, j_graph, 'textes_publies'))
+
             setAreAllDataUpload(true)
+
         })()
     }, [query, graph_query])
 
+    console.log('graphdata : ', JSON.stringify(graphData).length, 'graphdata id ', graphData.id)
+    // console.log(JSON.stringify(graphData))
+
     function transformData(j) {
+
         let res_tmp = []
         let res_timbres = []
+        let res_airs = []
 
         let initialStr = JSON.stringify(j)
         let finalStr = initialStr.slice(8, initialStr.length - 1)
@@ -507,6 +516,7 @@ function SingleTextePublie({ history, match }) {
         // // aller chercher les textes de l'exemplaire sélectionné
         if (finalStr !== '') {
             res_tmp = JSON.parse(finalStr)
+            console.log(res_tmp)
             if (res_tmp['textes_publies'].length) {
                 // update les informations du texte sélectionné
                 // on suppose qu'un seul texte peut être sélectionné dans le résultat de la query et donc que les uuid sont uniques 
@@ -521,11 +531,13 @@ function SingleTextePublie({ history, match }) {
                 }
                 else {
                     // sinon on renvoie un renvoie un tableau de timbres
-
                     for (let i = 0; i < lengthData; i++) {
                         res_timbres.push(res_tmp['timbres'][i])
+                        res_airs.push(res_tmp['timbres'][i]['airs'])
                     }
+                    setDataAirs(res_airs)
                     setDataTimbres(res_timbres)
+
                 }
             }
         }
@@ -671,7 +683,7 @@ function SingleTextePublie({ history, match }) {
         let nodes = ['airs', 'textes_publies', 'references_externes', 'themes', 'editions']
 
         let table = clickedData[0].split('__')[0]
-
+        setAreAllDataUpload(false)
         switch (table) {
             case nodes[0]:
                 history.push('/single_air/' + clickedData[0].split('__')[1])
@@ -716,7 +728,7 @@ function SingleTextePublie({ history, match }) {
                                     Titre du texte
                                 </Typography>
                                 <Typography variant='h3' color='inherit' align='justify'>
-                                    {dataTexte['titre']!=="" ? (<i>{dataTexte['titre']}</i>) :  (<i>Champ manquant</i>)}
+                                    {dataTexte['titre'] !== "" ? (<i>{dataTexte['titre']}</i>) : (<i>Champ manquant</i>)}
                                 </Typography>
                             </Grid>
                             <Grid item xs className={classes.margin}>
@@ -887,32 +899,32 @@ function SingleTextePublie({ history, match }) {
                                 Données en relation avec ce texte
                     </Typography>
                         </Paper>
-                        <Sigma
-                            graph={graphData}
-                            settings={{
-                                drawEdges: true,
-                                clone: false,
-                                minArrowSize: 2,
-                            }}
-                            style={{
-                                height: '500px',
-                                maxWidth: 'inherit',
-                            }}
-                            onClickNode={e => {
-                                setClickedData([e.data.node.id, e.data.node.label])
-                            }
-                            }
-                        >
-                            <RandomizeNodePositions>
-                                <ForceAtlas2
-                                    iterationsPerRender={1}
-                                    linLogMode
-                                    timeout={1000}
-                                    worker
-                                />
-                                {/* <RelativeSize initialSize={20} /> */}
-                            </RandomizeNodePositions>
-                        </Sigma>
+                            <Sigma key={id}
+                                graph={graphData}
+                                settings={{
+                                    drawEdges: true,
+                                    clone: false,
+                                    minArrowSize: 2,
+                                }}
+                                style={{
+                                    height: '500px',
+                                    maxWidth: 'inherit',
+                                }}
+                                onClickNode={e => {
+                                    setClickedData([e.data.node.id, e.data.node.label])
+                                }
+                                }
+                            >
+                                <RandomizeNodePositions>
+                                    <ForceAtlas2
+                                        iterationsPerRender={1}
+                                        linLogMode
+                                        timeout={1000}
+                                        worker
+                                    />
+                                    {/* <RelativeSize initialSize={20} /> */}
+                                </RandomizeNodePositions>
+                            </Sigma>
                         <Paper className={classes.paperWhite}>
                             {clickedData.length === 0 ? (
                                 <i>Aucune donnée sélectionnée</i>
@@ -1015,7 +1027,8 @@ function SingleTextePublie({ history, match }) {
                                 {openAirs ? <ExpandMore /> : <ExpandLess />}
                             </ListItem>
                             <Collapse in={openAirs} timeout="auto" unmountOnExit>
-                                {dataTimbres['airs'] ? (
+                                {console.log(dataAirs)}
+                                {dataTimbres && (dataAirs.length !== 0 ? (
                                     <MaterialTable
                                         localization={{
                                             body: {
@@ -1034,8 +1047,8 @@ function SingleTextePublie({ history, match }) {
                                             { title: 'Nom air', field: 'air_normalise' },
                                             { title: 'Surnom', field: 'surnom_1' },
                                         ]}
-                                        data={[dataTimbres['airs']]}
-                                        title={[dataTimbres['airs']] ? ("Air(s) correspondant(s) - " + [dataTimbres['airs']].length + " résultat") : ('Airs')}
+                                        data={dataAirs}
+                                        title={dataAirs ? ("Air(s) correspondant(s) - " + dataAirs.length + " résultat") : ('Airs')}
                                         onRowClick={((evt, selectedRow) => {
                                             if (evt.target.nodeName === 'TD') {
                                                 const selected_id = selectedRow['id']
@@ -1058,7 +1071,7 @@ function SingleTextePublie({ history, match }) {
                                         <Typography variant='h6' color='inherit' align='center'>
                                             Aucun air
                                         </Typography>
-                                    )}
+                                    ))}
                             </Collapse>
                             <ListItem
                                 button

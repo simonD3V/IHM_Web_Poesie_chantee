@@ -166,7 +166,7 @@ function Textes_publies() {
         }
     }      
     `
-
+    
     useEffect(() => {
         (async () => {
             let d = await fetch('http://bases-iremus.huma-num.fr/directus-tcf/graphql/', {

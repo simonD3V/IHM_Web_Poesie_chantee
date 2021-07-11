@@ -300,6 +300,7 @@ function Rechercher() {
             // setQuery(queryBuilder(descriptions, isItContained, and_or, fields))
             if (queryBuilder(descriptions, isItContained, and_or, fields) !== '') {
                 setDisplayOn(true)
+                console.log(queryBuilder(descriptions, isItContained, and_or, fields))
                 fetchDataAdvancedResearch(queryBuilder(descriptions, isItContained, and_or, fields))
             }
         } else {
@@ -407,7 +408,7 @@ function Rechercher() {
                                                 <em>N'importe quel champ</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'editions'}>Editions</MenuItem>
+                                            <MenuItem value={'edition'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>
@@ -445,7 +446,7 @@ function Rechercher() {
                                                 <em>N'importe quel champs</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'editions'}>Editions</MenuItem>
+                                            <MenuItem value={'edition'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>
@@ -482,7 +483,7 @@ function Rechercher() {
                                                 <em>N'importe quel champs</em>
                                             </MenuItem>
                                             <MenuItem value={'texte_publie'}>Texte publié</MenuItem>
-                                            <MenuItem value={'editions'}>Editions</MenuItem>
+                                            <MenuItem value={'edition'}>Editions</MenuItem>
                                             <MenuItem value={'air'}>Air</MenuItem>
                                             <MenuItem value={'auteur'}>Auteur</MenuItem>
                                             <MenuItem value={'ville'}>Ville</MenuItem>

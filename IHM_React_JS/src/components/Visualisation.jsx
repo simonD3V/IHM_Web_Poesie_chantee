@@ -341,6 +341,7 @@ function Visualisation({ history, match }) {
       }
       // Il faut maintenant relier les textes à leur exemplaire respectif, on invente une id pour ces liens 
       for (var e = 0; e < d[nodes[1]].length; e++) {
+        console.log(d[nodes[1]][e]['id'])
         res = res.concat('{ "id" : "' + e + '", "source" : "textes_publies__' + d[nodes[1]][e]['id'] + '", "target" : "editions__' + d[nodes[1]][e]['edition']['id'] + '", "color" : "#CFCFCF" }, ')
       }
       res = res.substring(0, res.length - 2)
@@ -441,7 +442,7 @@ function Visualisation({ history, match }) {
                 </List>
               </Paper>
             </Grid>
-            <Grid item xs>{/* col 2 */}
+            <Grid item xs>{/* col 2 */}{console.log(dataTransformed)}
               <Sigma
                 graph={dataTransformed}
                 settings={{ drawEdges: true, clone: false, zoomMax: 1.5 }}
@@ -458,6 +459,7 @@ function Visualisation({ history, match }) {
                   <ForceAtlas2
                     iterationsPerRender={1}
                     linLogMode
+                    barnesHutOptimize
                     timeout={1000}
                     worker
                   />
