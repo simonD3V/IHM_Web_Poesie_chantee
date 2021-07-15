@@ -521,6 +521,7 @@ function TestFormeLitteraire() {
         if (code_str.indexOf('|') > -1) {
             // il y a une '|' -> mention d'un refrain avant
             // déterminer où est le début du refrain et le début du couplet 
+            // partie code refrain : pas besoin d'indication de strophe et du nombre de vers par strophe
 
             let debutCouplet = 0
 
@@ -539,6 +540,11 @@ function TestFormeLitteraire() {
             let erreurs = 0
             let messages_erreurs = []
 
+            if (code_str.split('*').length - 1 < 2 ) {
+                messages_erreurs.push('Une indication est manquante : le nombre de strophe ou le nombre de vers par strophe ou la structure du vers')
+                erreurs += 1 
+            }
+ 
             for (var m = 0; m < debutCouplet - 1; m++) {
 
                 if (parseInt(code_str[m]) !== 'NaN' && parseInt(code_str[m]) < 10) {
@@ -616,6 +622,11 @@ function TestFormeLitteraire() {
             let i = 0
             let k = 0
             let j = 0
+
+            if (code_str.split('*').length - 1  < 2 ) {
+                messages_erreurs.push('Une indication est manquante : le nombre de strophe ou le nombre de vers par strophe ou la structure du vers')
+                erreurs += 1 
+            }
 
             let tmpNbrStrophe = ''
             while (i < 2 && code_str[i] !== '*') {
@@ -1013,7 +1024,7 @@ function TestFormeLitteraire() {
                                                         </Grid>
                                                     </Grid>
                                                 </Paper>) : (
-                                                    <Paper elevation={3} className={classes.paperResultRed} >
+                                                <Paper elevation={3} className={classes.paperResultRed} >
                                                         <Grid container spacing={2}
                                                             direction="row"
                                                             justify="center"
