@@ -295,7 +295,7 @@ function Rechercher() {
 
     }
     async function research() {
-        {console.log(basicSearch)}
+        { console.log(basicSearch) }
         if (!basicSearch) {
             // setQuery(queryBuilder(descriptions, isItContained, and_or, fields))
             if (queryBuilder(descriptions, isItContained, and_or, fields) !== '') {
@@ -366,6 +366,7 @@ function Rechercher() {
                     </Typography>
                 </Grid>
                 <Grid item xs={12}>
+
                     <List
                         className={classes.paper}
                         component="nav"
@@ -389,13 +390,17 @@ function Rechercher() {
                         </ListItem>
 
                         <Collapse in={clickSearch} timeout="auto" unmountOnExit>
-                            <Paper className={classes.advancedsearchpaper}>
+                            <Typography variant='h6' color='textPrimary' align='center' className={classes.descriptionTitle} >
+                                Outil encore indisponible (en développement). 
+                            </Typography>
+
+                            {/* <Paper className={classes.advancedsearchpaper}> 
                                 <Typography variant='h6' color='textSecondary' align='justify' style={{ maxWidth: '30%', margin: 10 }}>
                                     Recherche avancée
                                     </Typography>
 
                                 <Box>
-                                    <FormControl className={classes.formControl} variant="outlined">    {/* LIGNE DE RECHERCHE 1 */}
+                                    <FormControl className={classes.formControl} variant="outlined">    
                                         <Select
                                             name="fieldA"
                                             value={fields.fieldA}
@@ -433,7 +438,7 @@ function Rechercher() {
                                     </FormControl>
                                 </Box>
                                 <Box>
-                                    <FormControl className={classes.formControl} variant="outlined">    {/* LIGNE DE RECHERCHE 2 */}
+                                    <FormControl className={classes.formControl} variant="outlined">    
                                         <Select
                                             name="fieldB"
                                             value={fields.fieldB}
@@ -470,7 +475,7 @@ function Rechercher() {
                                     </FormControl>
                                 </Box>
                                 <Box>
-                                    <FormControl className={classes.formControl} variant="outlined">    {/* LIGNE DE RECHERCHE 3 */}
+                                    <FormControl className={classes.formControl} variant="outlined">  
                                         <Select
                                             name="fieldC"
                                             value={fields.fieldC}
@@ -524,7 +529,7 @@ function Rechercher() {
                                         (Choisir entre une adjonction 'Et' ou une conjonction 'Ou')
                                     </Typography>
                                 </Box>
-                            </Paper>
+                        </Paper> */}
                         </Collapse>
                     </List>
                 </Grid>
